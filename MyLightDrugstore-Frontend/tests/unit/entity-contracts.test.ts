@@ -56,10 +56,13 @@ test("sale adapter maps sale lifecycle requests", async () => {
   const api = createSaleApi(fakeClient(calls))
 
   await api.list({ status: "open" })
-  await api.create({
-    customerName: "Walk-in",
-    items: [{ medicineId: "med-1", quantity: 2 }],
-  }, "sale-key")
+  await api.create(
+    {
+      customerName: "Walk-in",
+      items: [{ medicineId: "med-1", quantity: 2 }],
+    },
+    "sale-key",
+  )
   await api.addItem("sale-1", { medicineId: "med-2", quantity: 1 }, "item-key")
   await api.removeItem("sale-1", "item-1")
   await api.markPaid("sale-1")
