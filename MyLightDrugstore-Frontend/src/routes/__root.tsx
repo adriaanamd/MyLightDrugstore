@@ -2,12 +2,13 @@ import {
   HeadContent,
   Outlet,
   Scripts,
-  createRootRoute,
+  createRootRouteWithContext,
 } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 import { AppProviders } from "@/app/providers/app-providers"
+import type { AuthRouteContext } from "@/app/router/guards"
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<AuthRouteContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },

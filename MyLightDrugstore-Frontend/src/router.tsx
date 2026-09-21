@@ -1,11 +1,14 @@
-import { createRouter, type RouterOptions } from "@tanstack/react-router"
+import { createRouter, type RouterHistory } from "@tanstack/react-router"
 import { routeTree } from "./routeTree.gen"
 
-type AppRouterOptions = Omit<RouterOptions<typeof routeTree, "never">, "routeTree">
+type AppRouterOptions = {
+  history?: RouterHistory
+}
 
 export function getRouter(options: AppRouterOptions = {}) {
   return createRouter({
     routeTree,
+    context: { user: null },
     scrollRestoration: true,
     ...options,
   })
