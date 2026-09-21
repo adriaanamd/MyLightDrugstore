@@ -7,7 +7,10 @@ import { SaleCreationForm } from "@/features/sale-creation/ui/sale-creation-form
 describe("sales workflows", () => {
   it("submits sale creation with a stable idempotency key", async () => {
     const user = userEvent.setup()
-    const submissions: unknown[] = []
+    const submissions: Array<{
+      payload: unknown
+      idempotencyKey: string
+    }> = []
 
     render(
       <SaleCreationForm
