@@ -15,8 +15,8 @@
     "test:unit": "tsx --test \"tests/unit/*.test.ts\"",
     "test:component": "vitest run tests/component",
     "test:architecture": "node scripts/check-fsd-boundaries.test.mjs && node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce",
-    "test": "pnpm run test:unit && pnpm run test:component",
-    "check": "pnpm run test:architecture && pnpm run typecheck && pnpm run format:check && pnpm run test && pnpm run build"
+    "test": "corepack pnpm run test:unit && corepack pnpm run test:component",
+    "check": "corepack pnpm run test:architecture && corepack pnpm run typecheck && corepack pnpm run format:check && corepack pnpm run test && corepack pnpm run build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.103.1",
