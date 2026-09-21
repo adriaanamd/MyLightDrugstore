@@ -9,6 +9,7 @@ use App\Modules\Identity\Domain\Users\StaffRole;
 use App\Modules\Identity\Domain\Users\Username;
 use App\Modules\Identity\Infrastructure\Persistence\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\EncryptedTransportRequestBuilder;
@@ -159,6 +160,18 @@ final class AuthenticationControllerTest extends TestCase
             $this->assertSame('validation_failed', $payload['error']['code']);
             $this->assertArrayHasKey('newPassword', $payload['error']['details']);
         }
+    }
+
+    public function test_deactivating_an_authenticated_account_invalidates_its_existing_session(): void
+    {
+        $user = $this->createUser();
+        $this->authenticateUser();
+
+        $user->active = false;
+        $user->save();
+        Auth::forgetGuards();
+
+        $this->encryptedRequest('GET', '/api/v1/auth/me')->assertUnauthorized();
     }
 
     private function requestCsrfToken(): string

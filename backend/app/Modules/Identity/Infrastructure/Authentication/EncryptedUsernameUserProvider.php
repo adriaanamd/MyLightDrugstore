@@ -46,4 +46,12 @@ final class EncryptedUsernameUserProvider extends EloquentUserProvider
             ->where('active', true)
             ->first();
     }
+
+    public function retrieveById($identifier): ?User
+    {
+        return User::query()
+            ->whereKey($identifier)
+            ->where('active', true)
+            ->first();
+    }
 }
