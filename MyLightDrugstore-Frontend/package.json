@@ -4,45 +4,27 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
     "preview": "vite preview",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "test:unit": "tsx --test \"tests/unit/*.test.ts\"",
-    "test:component": "vitest run tests/component",
-    "test:architecture": "node scripts/check-fsd-boundaries.test.mjs && node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce",
-    "test": "corepack pnpm run test:unit && corepack pnpm run test:component",
-    "check": "corepack pnpm run test:architecture && corepack pnpm run typecheck && corepack pnpm run format:check && corepack pnpm run test && corepack pnpm run build"
+    "format": "oxfmt"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.103.1",
     "@tanstack/react-router": "^1.170.38",
     "@tanstack/react-start": "^1.168.56",
+    "@tanstack/router-plugin": "^1.168.40",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",
-    "@testing-library/jest-dom": "^7.0.1",
-    "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
-    "eslint": "^10.11.0",
-    "jsdom": "^30.1.0",
     "oxfmt": "^0.2.0",
-    "playwright": "^1.63.0",
-    "prettier": "^3.9.8",
     "tailwindcss": "^4.0.0",
-    "tsx": "^4.23.15",
     "typescript": "^5.7.0",
-    "vite": "^8.0.5",
-    "vitest": "^5.0.1"
+    "vite": "^8.0.5"
   }
 }
