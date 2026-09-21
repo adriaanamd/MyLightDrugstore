@@ -2,6 +2,9 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 import { createInventoryApi } from "@/entities/inventory"
 import { createMedicineApi } from "@/entities/medicine"
+import { createBackupApi } from "@/entities/backup"
+import { createReportApi } from "@/entities/report"
+import { createSaleApi } from "@/entities/sale"
 
 test("medicine adapter maps catalog reads and mutations to Laravel routes", async () => {
   const calls: unknown[] = []
@@ -14,7 +17,11 @@ test("medicine adapter maps catalog reads and mutations to Laravel routes", asyn
 
   assert.deepEqual(calls, [
     { path: "/medicines?search=paracetamol&page=2", method: "GET" },
-    { path: "/medicines/med-1", method: "PATCH", body: { name: "Paracetamol 500mg" } },
+    {
+      path: "/medicines/med-1",
+      method: "PATCH",
+      body: { name: "Paracetamol 500mg" },
+    },
     { path: "/medicines/med-1/archive", method: "POST" },
   ])
 })
@@ -44,9 +51,73 @@ test("inventory adapter maps receipt, adjustment, and movement requests", async 
   ])
 })
 
+test("sale adapter maps sale lifecycle requests", async () => {
+  const calls: unknown[] = []
+  const api = createSaleApi(fakeClient(calls))
+
+  await api.list({ status: "open" })
+  await api.create({
+    customerName: "Walk-in",
+    items: [{ medicineId: "med-1", quantity: 2 }],
+  })
+  await api.markPaid("sale-1")
+  await api.cancel("sale-1", "duplicate")
+
+  assert.deepEqual(calls, [
+    { path: "/sales?status=open", method: "GET" },
+    {
+      path: "/sales",
+      method: "POST",
+      body: {
+        customerName: "Walk-in",
+        items: [{ medicineId: "med-1", quantity: 2 }],
+      },
+    },
+    { path: "/sales/sale-1/mark-paid", method: "POST" },
+    {
+      path: "/sales/sale-1/cancel",
+      method: "POST",
+      body: { reason: "duplicate" },
+    },
+  ])
+})
+
+test("report and backup adapters map filters and binary downloads", async () => {
+  const calls: unknown[] = []
+  const reportApi = createReportApi(fakeClient(calls))
+  const backupApi = createBackupApi(fakeClient(calls))
+
+  await reportApi.inventory({ from: "2026-01-01", to: "2026-01-31" })
+  await reportApi.sales({
+    from: "2026-01-01",
+    to: "2026-01-31",
+    status: "paid",
+  })
+  await backupApi.create()
+  await backupApi.show("backup-1")
+  await backupApi.download("backup-1")
+
+  assert.deepEqual(calls, [
+    { path: "/reports/inventory?from=2026-01-01&to=2026-01-31", method: "GET" },
+    {
+      path: "/reports/sales?from=2026-01-01&to=2026-01-31&status=paid",
+      method: "GET",
+    },
+    { path: "/backups", method: "POST" },
+    { path: "/backups/backup-1", method: "GET" },
+    { path: "/backups/backup-1/download", method: "GET" },
+  ])
+})
+
 function fakeClient(calls: unknown[]) {
   return {
-    async request<T>(path: string, init: { method?: string; body?: unknown } = {}) {
+    async request<T,>(
+      path: string,
+      init: {
+        method?: string
+        body?: unknown
+      } = {},
+    ) {
       calls.push({ path, ...init })
       return { data: {} as T, status: 200, headers: new Headers() }
     },
