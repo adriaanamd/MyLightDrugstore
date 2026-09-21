@@ -1,11 +1,13 @@
 import { createAuthClient } from "@/features/auth"
 import { createSessionStore } from "@/features/auth/model/session"
 import type { SessionStore } from "@/features/auth/model/types"
+import type { AuthSessionClient } from "@/features/auth/model/types"
 import { createTransportClient, type TransportClient } from "@/shared/api"
 import { runtimeEnv } from "@/shared/config/env"
 
 export type AppServices = {
   transport: TransportClient
+  auth: AuthSessionClient
   session: SessionStore
 }
 
@@ -21,6 +23,7 @@ function createServices(): AppServices {
   const auth = createAuthClient(transport)
   return {
     transport,
+    auth,
     session: createSessionStore(auth),
   }
 }

@@ -20,6 +20,7 @@ import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_aut
 import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports/sales'
 import { Route as AuthenticatedSalesSaleIdRouteImport } from './routes/_authenticated/sales/$saleId'
 import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales/new'
+import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings/security'
 import { Route as AuthenticatedSalesSaleIdPrintRouteImport } from './routes/_authenticated/sales/$saleId/print'
 
 const IndexRoute = IndexRouteImport.update({
@@ -79,6 +80,12 @@ const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
+const AuthenticatedSettingsSecurityRoute =
+  AuthenticatedSettingsSecurityRouteImport.update({
+    id: '/settings/security',
+    path: '/settings/security',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedSalesSaleIdPrintRoute =
   AuthenticatedSalesSaleIdPrintRouteImport.update({
     id: '/print',
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRoutesByTo {
@@ -110,6 +118,7 @@ export interface FileRoutesByTo {
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
   '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRoutesById {
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/_authenticated/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
   '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
   '/_authenticated/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/sales/$saleId'
     | '/sales/new'
+    | '/settings/security'
     | '/sales/$saleId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/reports/sales'
     | '/sales/$saleId'
     | '/sales/new'
+    | '/settings/security'
     | '/sales/$saleId/print'
   id:
     | '__root__'
@@ -167,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/sales'
     | '/_authenticated/sales/$saleId'
     | '/_authenticated/sales/new'
+    | '/_authenticated/settings/security'
     | '/_authenticated/sales/$saleId/print'
   fileRoutesById: FileRoutesById
 }
@@ -255,6 +268,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
     }
+    '/_authenticated/settings/security': {
+      id: '/_authenticated/settings/security'
+      path: '/settings/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof AuthenticatedSettingsSecurityRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/sales/$saleId/print': {
       id: '/_authenticated/sales/$saleId/print'
       path: '/print'
@@ -299,6 +319,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
   AuthenticatedReportsInventoryRoute: typeof AuthenticatedReportsInventoryRoute
   AuthenticatedReportsSalesRoute: typeof AuthenticatedReportsSalesRoute
+  AuthenticatedSettingsSecurityRoute: typeof AuthenticatedSettingsSecurityRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -308,6 +329,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
   AuthenticatedReportsInventoryRoute: AuthenticatedReportsInventoryRoute,
   AuthenticatedReportsSalesRoute: AuthenticatedReportsSalesRoute,
+  AuthenticatedSettingsSecurityRoute: AuthenticatedSettingsSecurityRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
