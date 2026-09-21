@@ -12,7 +12,7 @@
     "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "test:unit": "vitest run tests/unit",
+    "test:unit": "tsx --test \"tests/unit/*.test.ts\"",
     "test:component": "vitest run tests/component",
     "test:architecture": "node scripts/check-fsd-boundaries.test.mjs && node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce",
     "test": "pnpm run test:unit && pnpm run test:component",
