@@ -21,6 +21,7 @@
             <directory suffix="Test.php">tests/Feature/Modules/Inventory</directory>
             <directory suffix="Test.php">tests/Feature/Modules/Sales</directory>
             <directory suffix="Test.php">tests/Feature/Modules/Operations</directory>
+            <directory suffix="Test.php">tests/Feature/Modules/Users</directory>
         </testsuite>
         <testsuite name="FeatureTransport">
             <directory suffix="Test.php">tests/Feature/Modules</directory>
@@ -29,6 +30,7 @@
             <exclude>tests/Feature/Modules/Inventory</exclude>
             <exclude>tests/Feature/Modules/Sales</exclude>
             <exclude>tests/Feature/Modules/Operations</exclude>
+            <exclude>tests/Feature/Modules/Users</exclude>
         </testsuite>
     </testsuites>
     <source>

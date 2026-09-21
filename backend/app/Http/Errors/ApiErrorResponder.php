@@ -9,6 +9,7 @@ use App\Modules\Inventory\Domain\InsufficientStockException;
 use App\Modules\Inventory\Domain\SaleItemStockHistoryMissingException;
 use App\Modules\Sales\Domain\IdempotencyKeyReusedException;
 use App\Modules\Sales\Domain\SaleNotEditableException;
+use App\Modules\Users\Domain\UsernameAlreadyExists;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -118,6 +119,15 @@ final class ApiErrorResponder
         }
 
         if ($exception instanceof SaleNotEditableException) {
+            return $this->error(
+                $request,
+                Response::HTTP_CONFLICT,
+                'conflict',
+                'The request conflicts with the current resource state.',
+            );
+        }
+
+        if ($exception instanceof UsernameAlreadyExists) {
             return $this->error(
                 $request,
                 Response::HTTP_CONFLICT,
