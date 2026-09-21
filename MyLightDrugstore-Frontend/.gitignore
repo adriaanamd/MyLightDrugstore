@@ -5,6 +5,7 @@ build/
 .cache/
 .env*
 .vite/
+.tanstack/
 vite.config.*.timestamp-*
 *.tsbuildinfo
 *-debug.log*
