@@ -170,6 +170,8 @@ The React application is a first-party client. Use Laravel-managed session authe
 
 `POST /auth/login` accepts a `username` and `password`. `POST /auth/logout` ends the session. `GET /auth/me` returns the authenticated user's `id`, `username`, `fullName`, `role`, and `active` state. Passwords are never returned. Store password hashes, not plaintext passwords.
 
+Current Laravel state: inactive users are rejected during credential lookup, identifier lookup, and remember-token restoration. A successful password change replaces the password hash, records `passwordChangedAt`, and clears the remember token so persistent sessions cannot survive a credential change. The current login flow does not request a remember-me session, but the provider still enforces the inactive-account rule for future session drivers.
+
 | Capability | Admin | Staff |
 | --- | --- | --- |
 | Read medicines and inventory | Yes | Yes |
@@ -363,7 +365,7 @@ Cancel request:
 | `POST /users` | Admin | Create an account |
 | `GET /users/{userId}` | Admin | Read an account |
 | `PATCH /users/{userId}` | Admin | Update name, role, or active state |
-Create request fields are `username`, `fullName`, `password`, and `role`. Roles are `admin` or `staff`. Account resources return `id`, `username`, `fullName`, `role`, `active`, `createdAt`, and `updatedAt`; encrypted database fields are decrypted only inside the server boundary. `GET /users` returns the standard `data` and pagination `meta` envelope and accepts `active`, `page`, and `perPage`. The password-change request contains `currentPassword` and `newPassword`; the new password must be at least 12 characters and differ from the current password. Deactivate accounts instead of deleting users referenced by sales or inventory movements. Password reset for another user requires a separate audited workflow and is not part of this contract.
+Create request fields are `username`, `fullName`, `password`, and `role`. Roles are `admin` or `staff`. Account resources return `id`, `username`, `fullName`, `role`, `active`, `createdAt`, and `updatedAt`; encrypted database fields are decrypted only inside the server boundary. `GET /users` returns the standard `data` and pagination `meta` envelope and accepts `active`, `page`, and `perPage`. The password-change request contains `currentPassword` and `newPassword`; the new password must be at least 12 characters and differ from the current password. Deactivate accounts instead of deleting users referenced by sales or inventory movements. Password reset for another user requires a separate audited workflow and is not part of this contract. Current Laravel state: account create/update/deactivation endpoints are implemented and protected by admin middleware; audit persistence currently covers backup requests/downloads and sale cancellation, while account-change audit events remain a production-hardening item.
 
 ### Reports
 
@@ -383,7 +385,7 @@ Report endpoints accept `from` and `to` dates and return aggregate data, not pay
 | `GET /backups/{backupId}/download` | Admin | Download a completed backup |
 | `GET /system/time` | Admin, staff | Return current server time for the legacy clock widget |
 
-Backup requests return `202 Accepted` with a job ID and status metadata (`id`, `status`, `requestedAt`, `completedAt`, and `size`). Store backup files outside the public web root, encrypt them at rest, audit requests and downloads, and never return SQL contents in an API response. The Laravel implementation writes an encrypted logical database snapshot to the private local disk through a queued job; status and download are admin-only while requests are available to staff and admins. The system-time response is `{"data":{"now":"2026-09-18T02:00:00Z"}}`.
+Backup requests return `202 Accepted` with a job ID and status metadata (`id`, `status`, `requestedAt`, `completedAt`, and `size`). Store backup files outside the public web root, encrypt them at rest, audit requests and downloads, and never return SQL contents in an API response. The Laravel implementation writes an encrypted logical database snapshot to the private local disk through a queued job; status and download are admin-only while requests are available to staff and admins. Failed generation records only the generic reason `Backup generation failed.` and rethrows the original exception to the queue worker, so database or key details are not persisted in the job record. The system-time response is `{"data":{"now":"2026-09-18T02:00:00Z"}}`.
 
 ## Inventory and sales invariants
 
