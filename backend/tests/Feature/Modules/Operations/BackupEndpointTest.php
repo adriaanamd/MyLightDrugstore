@@ -8,6 +8,7 @@ use App\Modules\Identity\Domain\Users\FullName;
 use App\Modules\Identity\Domain\Users\StaffRole;
 use App\Modules\Identity\Domain\Users\Username;
 use App\Modules\Identity\Infrastructure\Persistence\User;
+use App\Modules\Security\Application\UsernameLookupDigest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +54,12 @@ final class BackupEndpointTest extends TestCase
         $artifactPath = 'backups/backup-'.$backup['id'].'.json.enc';
         Storage::disk('local')->assertExists($artifactPath);
         $this->assertStringNotContainsString('backup.staff', Storage::disk('local')->get($artifactPath));
+        $this->assertDatabaseHas('audit_events', [
+            'actor_user_id' => $this->userId('backup.staff'),
+            'event' => 'backup.requested',
+            'subject_type' => 'backup',
+            'subject_id' => (string) $backup['id'],
+        ]);
     }
 
     public function test_only_an_admin_can_read_status_and_download_a_backup(): void
@@ -66,7 +73,8 @@ final class BackupEndpointTest extends TestCase
         $this->encryptedRequest('GET', '/api/v1/backups/'.$backupId)->assertForbidden();
         $this->encryptedRequest('GET', '/api/v1/backups/'.$backupId.'/download')->assertForbidden();
 
-        $this->actingAs($this->createUser('backup.admin', 'Backup Admin', StaffRole::Admin), 'web');
+        $admin = $this->createUser('backup.admin', 'Backup Admin', StaffRole::Admin);
+        $this->actingAs($admin, 'web');
         $status = $this->encryptedRequest('GET', '/api/v1/backups/'.$backupId)->assertOk();
         $statusPayload = $this->responsePayload($status, 'GET', '/api/v1/backups/'.$backupId);
         $this->assertSame($backupId, $statusPayload['data']['id']);
@@ -79,6 +87,12 @@ final class BackupEndpointTest extends TestCase
         $this->assertSame('base64', $descriptor['bodyEncoding']);
         $this->assertStringContainsString('attachment;', $descriptor['headers']['content-disposition']);
         $this->assertStringContainsString('backup-'.$backupId.'.json', $descriptor['headers']['content-disposition']);
+        $this->assertDatabaseHas('audit_events', [
+            'actor_user_id' => $admin->getKey(),
+            'event' => 'backup.downloaded',
+            'subject_type' => 'backup',
+            'subject_id' => (string) $backupId,
+        ]);
     }
 
     public function test_unknown_backup_ids_are_not_disclosed(): void
@@ -99,6 +113,13 @@ final class BackupEndpointTest extends TestCase
         $user->save();
 
         return $user;
+    }
+
+    private function userId(string $username): int
+    {
+        return User::query()
+            ->where('username_lookup_digest', app(UsernameLookupDigest::class)->digest($username))
+            ->value('id');
     }
 
     private function csrfToken(): string
