@@ -1,6 +1,6 @@
 # MyLightDrugstore API
 
-**Status:** Target contract for the refactor; Laravel implementation is underway. Registered backup paths still return `501 not_implemented` until their TDD slice replaces the placeholders.
+**Status:** Target contract for the refactor; the documented v1 endpoints are implemented in Laravel and covered by modular feature and architecture tests. Further hardening and operational refinement continue before production deployment.
 
 This document describes the target API and maps it to the current PHP application. The first release is a single-store pharmacy system for medicine catalog, inventory and receiving, sales, staff accounts, and reports.
 
@@ -219,7 +219,7 @@ A sale has a stable ID, creation time, state (`open`, `completed`, or `cancelled
 
 ## Endpoints
 
-All paths below are relative to `/api/v1`. Unless marked public, endpoints require an authenticated session. Every target path is registered during the refactor; backup paths remain the only registered paths whose behavior is not implemented yet and currently return `501 not_implemented`.
+All paths below are relative to `/api/v1`. Unless marked public, endpoints require an authenticated session. Every target path is registered with implemented behavior; unknown paths return the normal `404 not_found` API error.
 
 ### Transport
 
@@ -383,7 +383,7 @@ Report endpoints accept `from` and `to` dates and return aggregate data, not pay
 | `GET /backups/{backupId}/download` | Admin | Download a completed backup |
 | `GET /system/time` | Admin, staff | Return current server time for the legacy clock widget |
 
-Backup requests return `202 Accepted` with a job ID. Store backup files outside the public web root, encrypt them at rest, audit requests and downloads, and never return SQL contents in an API response. The current code creates local backup files; the target API must keep this capability private and permission-checked. The system-time response is `{"data":{"now":"2026-09-18T02:00:00Z"}}`.
+Backup requests return `202 Accepted` with a job ID and status metadata (`id`, `status`, `requestedAt`, `completedAt`, and `size`). Store backup files outside the public web root, encrypt them at rest, audit requests and downloads, and never return SQL contents in an API response. The Laravel implementation writes an encrypted logical database snapshot to the private local disk through a queued job; status and download are admin-only while requests are available to staff and admins. The system-time response is `{"data":{"now":"2026-09-18T02:00:00Z"}}`.
 
 ## Inventory and sales invariants
 
