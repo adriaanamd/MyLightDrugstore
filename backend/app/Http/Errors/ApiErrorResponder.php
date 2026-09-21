@@ -7,6 +7,7 @@ namespace App\Http\Errors;
 use App\Http\Middleware\AttachRequestId;
 use App\Modules\Inventory\Domain\InsufficientStockException;
 use App\Modules\Inventory\Domain\SaleItemStockHistoryMissingException;
+use App\Modules\Operations\Domain\BackupNotReady;
 use App\Modules\Sales\Domain\IdempotencyKeyReusedException;
 use App\Modules\Sales\Domain\SaleNotEditableException;
 use App\Modules\Users\Domain\UsernameAlreadyExists;
@@ -128,6 +129,15 @@ final class ApiErrorResponder
         }
 
         if ($exception instanceof UsernameAlreadyExists) {
+            return $this->error(
+                $request,
+                Response::HTTP_CONFLICT,
+                'conflict',
+                'The request conflicts with the current resource state.',
+            );
+        }
+
+        if ($exception instanceof BackupNotReady) {
             return $this->error(
                 $request,
                 Response::HTTP_CONFLICT,

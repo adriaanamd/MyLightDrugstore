@@ -4,32 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http;
 
-use Tests\Support\EncryptedTransportRequestBuilder;
-use Tests\Support\EncryptedTransportResponseReader;
 use Tests\TestCase;
 
 final class PendingApiEndpointTest extends TestCase
 {
-    public function test_registered_endpoint_without_implemented_behavior_returns_a_correlated_501(): void
+    public function test_unknown_versioned_endpoint_returns_a_correlated_not_found(): void
     {
-        $requestId = 'req_pending-route';
-        $path = '/api/v1/reports/sales';
-        $encrypted = (new EncryptedTransportRequestBuilder)->buildBodyless();
-        $response = $this->call('GET', $path, [], [], [], [
-            'HTTP_X_REQUEST_ID' => $requestId,
-            'HTTP_X_TRANSPORT_KEY' => $encrypted['header'],
-        ]);
+        $requestId = 'req_unknown-route';
+        $path = '/api/v1/this-endpoint-does-not-exist';
+        $response = $this->withHeader('X-Request-ID', $requestId)->getJson($path);
 
-        $response->assertStatus(501)->assertHeader('X-Request-ID', $requestId);
-        $descriptor = (new EncryptedTransportResponseReader)->read($response, $encrypted['aesKey'], 'GET', $path);
-        $errorResponse = json_decode($descriptor['body'], true, 512, JSON_THROW_ON_ERROR);
-
-        $this->assertSame([
+        $response->assertNotFound()->assertHeader('X-Request-ID', $requestId);
+        $response->assertExactJson([
             'error' => [
-                'code' => 'not_implemented',
-                'message' => 'This endpoint is registered but not implemented yet.',
+                'code' => 'not_found',
+                'message' => 'The requested resource was not found.',
                 'requestId' => $requestId,
             ],
-        ], $errorResponse);
+        ]);
     }
 }
