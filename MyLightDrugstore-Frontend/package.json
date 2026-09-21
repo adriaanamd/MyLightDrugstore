@@ -1,13 +1,22 @@
 {
-  "name": "figma-make-app",
+  "name": "mylightdrugstore-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
+    "start": "node .output/server/index.mjs",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run tests/unit",
+    "test:component": "vitest run tests/component",
+    "test:architecture": "node scripts/check-fsd-boundaries.test.mjs && node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce",
+    "test": "pnpm run test:unit && pnpm run test:component",
+    "check": "pnpm run test:architecture && pnpm run typecheck && pnpm run format:check && pnpm run test && pnpm run build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.103.1",
