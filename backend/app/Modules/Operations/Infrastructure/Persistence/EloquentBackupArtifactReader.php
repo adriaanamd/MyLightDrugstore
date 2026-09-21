@@ -29,7 +29,13 @@ final class EloquentBackupArtifactReader implements BackupArtifactReader
             throw new BackupNotReady;
         }
 
-        $encoded = Storage::disk('local')->get(BackupArtifactGenerator::path($backupId));
+        $disk = config('backups.disk', 'local');
+
+        if (! is_string($disk) || $disk === '') {
+            throw new BackupNotReady;
+        }
+
+        $encoded = Storage::disk($disk)->get(BackupArtifactGenerator::path($backupId));
 
         if (! is_string($encoded)) {
             throw new BackupNotReady;

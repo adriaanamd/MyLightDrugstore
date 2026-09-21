@@ -15,21 +15,6 @@ use LogicException;
 
 final class BackupArtifactGenerator implements BackupArtifactGeneratorContract
 {
-    /** @var list<string> */
-    private const array TABLES = [
-        'users',
-        'medicines',
-        'inventory_receipts',
-        'inventory_lots',
-        'inventory_movements',
-        'inventory_adjustments',
-        'sales',
-        'sale_items',
-        'sales_idempotency_keys',
-        'sale_cancellations',
-        'backup_jobs',
-    ];
-
     public function __construct(private readonly SensitiveDataProtector $protector) {}
 
     public function generate(int $backupId): void
@@ -40,7 +25,7 @@ final class BackupArtifactGenerator implements BackupArtifactGeneratorContract
             'tables' => [],
         ];
 
-        foreach (self::TABLES as $table) {
+        foreach ($this->tables() as $table) {
             $snapshot['tables'][$table] = DB::table($table)->get()->map(
                 static fn (object $row): array => get_object_vars($row),
             )->all();
@@ -55,7 +40,7 @@ final class BackupArtifactGenerator implements BackupArtifactGeneratorContract
         $encoded = $this->protector->encrypt($plaintext, 'backups.artifact');
         $path = $this->path($backupId);
 
-        if (! Storage::disk('local')->put($path, $encoded)) {
+        if (! Storage::disk($this->disk())->put($path, $encoded)) {
             throw new LogicException('The backup artifact could not be stored.');
         }
 
@@ -68,6 +53,35 @@ final class BackupArtifactGenerator implements BackupArtifactGeneratorContract
 
     public static function path(int $backupId): string
     {
-        return 'backups/backup-'.$backupId.'.json.enc';
+        $prefix = config('backups.path_prefix', 'backups');
+
+        if (! is_string($prefix) || $prefix === '') {
+            throw new LogicException('The backup path prefix must be a non-empty string.');
+        }
+
+        return trim($prefix, '/').'/backup-'.$backupId.'.json.enc';
+    }
+
+    private function disk(): string
+    {
+        $disk = config('backups.disk', 'local');
+
+        if (! is_string($disk) || $disk === '') {
+            throw new LogicException('The backup storage disk must be a non-empty string.');
+        }
+
+        return $disk;
+    }
+
+    /** @return list<string> */
+    private function tables(): array
+    {
+        $tables = config('backups.tables', []);
+
+        if (! is_array($tables) || ! array_is_list($tables) || array_filter($tables, 'is_string') !== $tables) {
+            throw new LogicException('The backup table configuration must be a list of strings.');
+        }
+
+        return $tables;
     }
 }
