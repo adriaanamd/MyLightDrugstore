@@ -6,6 +6,7 @@ namespace App\Modules\Users\Presentation;
 
 use App\Modules\Users\Application\UserListFilters;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use LogicException;
 
 final class UserListRequest extends FormRequest
@@ -14,7 +15,7 @@ final class UserListRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'active' => ['sometimes', 'boolean'],
+            'active' => ['sometimes', Rule::in([true, false, 1, 0, '1', '0', 'true', 'false'])],
             'page' => ['sometimes', 'integer', 'min:1'],
             'perPage' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ];

@@ -52,6 +52,21 @@ final class UserAccountEndpointTest extends TestCase
         $this->assertTrue($payload['data'][0]['active']);
     }
 
+    public function test_an_admin_can_filter_deactivated_accounts(): void
+    {
+        $admin = $this->createUser('accounts.admin', 'Accounts Admin', StaffRole::Admin);
+        $inactive = $this->createUser('accounts.inactive', 'Accounts Inactive');
+        $inactive->active = false;
+        $inactive->save();
+        $this->actingAs($admin, 'web');
+
+        $payload = $this->payload('GET', '/api/v1/users?active=false');
+
+        $this->assertSame(1, $payload['meta']['total']);
+        $this->assertSame('accounts.inactive', $payload['data'][0]['username']);
+        $this->assertFalse($payload['data'][0]['active']);
+    }
+
     public function test_staff_cannot_access_account_management(): void
     {
         $this->actingAs($this->createUser('accounts.staff', 'Accounts Staff'), 'web');
@@ -125,6 +140,20 @@ final class UserAccountEndpointTest extends TestCase
         $this->assertArrayHasKey('fullName', $details);
         $this->assertArrayHasKey('password', $details);
         $this->assertArrayHasKey('role', $details);
+    }
+
+    public function test_update_rejects_an_empty_patch(): void
+    {
+        $admin = $this->createUser('accounts.admin', 'Accounts Admin', StaffRole::Admin);
+        $staff = $this->createUser('accounts.staff', 'Accounts Staff');
+        $this->actingAs($admin, 'web');
+
+        $csrfToken = $this->csrfToken();
+        $path = '/api/v1/users/'.$staff->getKey();
+        $response = $this->encryptedRequest('PATCH', $path, [], $csrfToken)->assertUnprocessable();
+        $details = $this->responsePayload($response, 'PATCH', $path)['error']['details'];
+
+        $this->assertArrayHasKey('user', $details);
     }
 
     /** @return array<string, mixed> */
