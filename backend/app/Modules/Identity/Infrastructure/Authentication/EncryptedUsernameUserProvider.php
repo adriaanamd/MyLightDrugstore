@@ -54,4 +54,22 @@ final class EncryptedUsernameUserProvider extends EloquentUserProvider
             ->where('active', true)
             ->first();
     }
+
+    public function retrieveByToken($identifier, #[SensitiveParameter] $token): ?User
+    {
+        $user = User::query()
+            ->whereKey($identifier)
+            ->where('active', true)
+            ->first();
+
+        if ($user === null) {
+            return null;
+        }
+
+        $rememberToken = $user->getRememberToken();
+
+        return is_string($rememberToken) && $rememberToken !== '' && hash_equals($rememberToken, $token)
+            ? $user
+            : null;
+    }
 }

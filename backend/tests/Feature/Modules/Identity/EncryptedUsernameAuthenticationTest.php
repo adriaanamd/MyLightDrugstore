@@ -65,6 +65,17 @@ final class EncryptedUsernameAuthenticationTest extends TestCase
         $this->assertFalse(Auth::attempt(['username' => 'invalid username', 'password' => 'incorrect-password']));
     }
 
+    public function test_remember_tokens_cannot_restore_a_deactivated_account(): void
+    {
+        $inactive = $this->createUser('inactive.remember', 'CorrectHorseBatteryStaple!2026', active: false);
+        $inactive->setRememberToken('inactive-remember-token');
+        $inactive->save();
+
+        $provider = Auth::getProvider();
+
+        $this->assertNull($provider->retrieveByToken($inactive->getAuthIdentifier(), 'inactive-remember-token'));
+    }
+
     private function createUser(string $username, string $password, bool $active = true): User
     {
         $user = new User;
