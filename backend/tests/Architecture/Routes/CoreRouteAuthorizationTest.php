@@ -65,6 +65,14 @@ final class CoreRouteAuthorizationTest extends TestCase
         }
     }
 
+    public function test_system_time_route_requires_an_authenticated_session(): void
+    {
+        $route = RouteFacade::getRoutes()->getByName('api.v1.system.time');
+
+        $this->assertNotNull($route);
+        $this->assertContains('auth:web', $route->middleware());
+    }
+
     /** @return list<Route> */
     private function routesStartingWith(string $prefix): array
     {

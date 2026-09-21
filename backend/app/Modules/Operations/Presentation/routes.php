@@ -21,4 +21,5 @@ Route::get('/backups/{backupId}/download', BackupDownloadController::class)
     ->whereNumber('backupId')
     ->name('api.v1.backups.download');
 Route::get('/system/time', ServerTimeController::class)
+    ->middleware('auth:web')
     ->name('api.v1.system.time');
