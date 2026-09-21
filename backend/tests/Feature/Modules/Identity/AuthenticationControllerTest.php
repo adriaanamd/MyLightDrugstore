@@ -109,6 +109,8 @@ final class AuthenticationControllerTest extends TestCase
     public function test_it_changes_the_authenticated_users_password_after_verifying_the_current_password(): void
     {
         $user = $this->createUser();
+        $user->setRememberToken('old-remember-token');
+        $user->save();
         $this->authenticateUser();
         $csrfToken = $this->requestCsrfToken();
         $newPassword = 'ANewSecurePassword!2026';
@@ -122,6 +124,7 @@ final class AuthenticationControllerTest extends TestCase
         $this->assertTrue(Hash::check($newPassword, $user->getAuthPassword()));
         $this->assertFalse(Hash::check('CorrectHorseBatteryStaple!2026', $user->getAuthPassword()));
         $this->assertNotNull($user->password_changed_at);
+        $this->assertSame('', $user->getRememberToken());
         $this->encryptedRequest('GET', '/api/v1/auth/me')->assertOk();
     }
 

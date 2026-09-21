@@ -35,6 +35,7 @@ final class LaravelAuthenticationSession implements AuthenticationSession
         }
 
         $user->password = $newPassword;
+        $user->setRememberToken('');
         $user->setAttribute('password_changed_at', now());
         $user->save();
 
