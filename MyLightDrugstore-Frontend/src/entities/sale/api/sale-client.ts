@@ -8,8 +8,14 @@ export function createSaleApi(client: Pick<TransportClient, "request">) {
         method: "GET",
       })
     },
-    create(payload: SaleCreatePayload) {
-      return client.request<Sale>("/sales", { method: "POST", body: payload })
+    create(payload: SaleCreatePayload, idempotencyKey?: string) {
+      return client.request<Sale>("/sales", {
+        method: "POST",
+        body: payload,
+        headers: idempotencyKey
+          ? { "Idempotency-Key": idempotencyKey }
+          : undefined,
+      })
     },
     show(id: string) {
       return client.request<Sale>(`/sales/${id}`, { method: "GET" })

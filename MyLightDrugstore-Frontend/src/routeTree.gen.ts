@@ -15,6 +15,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedCatalogRouteImport } from './routes/_authenticated/catalog'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
+import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
+import { Route as AuthenticatedSalesSaleIdRouteImport } from './routes/_authenticated/sales/$saleId'
+import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales/new'
+import { Route as AuthenticatedSalesSaleIdPrintRouteImport } from './routes/_authenticated/sales/$saleId/print'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,6 +49,28 @@ const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSalesSaleIdRoute =
+  AuthenticatedSalesSaleIdRouteImport.update({
+    id: '/$saleId',
+    path: '/$saleId',
+    getParentRoute: () => AuthenticatedSalesRoute,
+  } as any)
+const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedSalesRoute,
+} as any)
+const AuthenticatedSalesSaleIdPrintRoute =
+  AuthenticatedSalesSaleIdPrintRouteImport.update({
+    id: '/print',
+    path: '/print',
+    getParentRoute: () => AuthenticatedSalesSaleIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -52,6 +78,10 @@ export interface FileRoutesByFullPath {
   '/catalog': typeof AuthenticatedCatalogRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventory': typeof AuthenticatedInventoryRoute
+  '/sales': typeof AuthenticatedSalesRouteWithChildren
+  '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
+  '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +89,10 @@ export interface FileRoutesByTo {
   '/catalog': typeof AuthenticatedCatalogRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventory': typeof AuthenticatedInventoryRoute
+  '/sales': typeof AuthenticatedSalesRouteWithChildren
+  '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
+  '/sales/new': typeof AuthenticatedSalesNewRoute
+  '/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +102,34 @@ export interface FileRoutesById {
   '/_authenticated/catalog': typeof AuthenticatedCatalogRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
+  '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
+  '/_authenticated/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
+  '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
+  '/_authenticated/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/catalog' | '/dashboard' | '/inventory'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/catalog'
+    | '/dashboard'
+    | '/inventory'
+    | '/sales'
+    | '/sales/$saleId'
+    | '/sales/new'
+    | '/sales/$saleId/print'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/catalog' | '/dashboard' | '/inventory'
+  to:
+    | '/'
+    | '/login'
+    | '/catalog'
+    | '/dashboard'
+    | '/inventory'
+    | '/sales'
+    | '/sales/$saleId'
+    | '/sales/new'
+    | '/sales/$saleId/print'
   id:
     | '__root__'
     | '/'
@@ -82,6 +138,10 @@ export interface FileRouteTypes {
     | '/_authenticated/catalog'
     | '/_authenticated/dashboard'
     | '/_authenticated/inventory'
+    | '/_authenticated/sales'
+    | '/_authenticated/sales/$saleId'
+    | '/_authenticated/sales/new'
+    | '/_authenticated/sales/$saleId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -134,19 +194,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedInventoryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/sales': {
+      id: '/_authenticated/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof AuthenticatedSalesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/sales/$saleId': {
+      id: '/_authenticated/sales/$saleId'
+      path: '/$saleId'
+      fullPath: '/sales/$saleId'
+      preLoaderRoute: typeof AuthenticatedSalesSaleIdRouteImport
+      parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/sales/new': {
+      id: '/_authenticated/sales/new'
+      path: '/new'
+      fullPath: '/sales/new'
+      preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
+      parentRoute: typeof AuthenticatedSalesRoute
+    }
+    '/_authenticated/sales/$saleId/print': {
+      id: '/_authenticated/sales/$saleId/print'
+      path: '/print'
+      fullPath: '/sales/$saleId/print'
+      preLoaderRoute: typeof AuthenticatedSalesSaleIdPrintRouteImport
+      parentRoute: typeof AuthenticatedSalesSaleIdRoute
+    }
   }
 }
+
+interface AuthenticatedSalesSaleIdRouteChildren {
+  AuthenticatedSalesSaleIdPrintRoute: typeof AuthenticatedSalesSaleIdPrintRoute
+}
+
+const AuthenticatedSalesSaleIdRouteChildren: AuthenticatedSalesSaleIdRouteChildren =
+  {
+    AuthenticatedSalesSaleIdPrintRoute: AuthenticatedSalesSaleIdPrintRoute,
+  }
+
+const AuthenticatedSalesSaleIdRouteWithChildren =
+  AuthenticatedSalesSaleIdRoute._addFileChildren(
+    AuthenticatedSalesSaleIdRouteChildren,
+  )
+
+interface AuthenticatedSalesRouteChildren {
+  AuthenticatedSalesSaleIdRoute: typeof AuthenticatedSalesSaleIdRouteWithChildren
+  AuthenticatedSalesNewRoute: typeof AuthenticatedSalesNewRoute
+}
+
+const AuthenticatedSalesRouteChildren: AuthenticatedSalesRouteChildren = {
+  AuthenticatedSalesSaleIdRoute: AuthenticatedSalesSaleIdRouteWithChildren,
+  AuthenticatedSalesNewRoute: AuthenticatedSalesNewRoute,
+}
+
+const AuthenticatedSalesRouteWithChildren =
+  AuthenticatedSalesRoute._addFileChildren(AuthenticatedSalesRouteChildren)
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCatalogRoute: typeof AuthenticatedCatalogRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
+  AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCatalogRoute: AuthenticatedCatalogRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
+  AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
