@@ -59,7 +59,16 @@ final class BackupArtifactGenerator implements BackupArtifactGeneratorContract
             throw new LogicException('The backup path prefix must be a non-empty string.');
         }
 
-        return trim($prefix, '/').'/backup-'.$backupId.'.json.enc';
+        $normalizedPrefix = trim($prefix, '/');
+        $segments = explode('/', $normalizedPrefix);
+
+        foreach ($segments as $segment) {
+            if ($segment === '' || $segment === '.' || $segment === '..' || str_contains($segment, '\\')) {
+                throw new LogicException('The backup path prefix contains an unsafe segment.');
+            }
+        }
+
+        return $normalizedPrefix.'/backup-'.$backupId.'.json.enc';
     }
 
     private function disk(): string
