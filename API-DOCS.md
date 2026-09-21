@@ -1,6 +1,6 @@
 # MyLightDrugstore API
 
-**Status:** Target contract for the refactor; Laravel implementation is underway. Registered paths without implemented behavior return `501 not_implemented` until their TDD slices replace the placeholders.
+**Status:** Target contract for the refactor; Laravel implementation is underway. Registered backup paths still return `501 not_implemented` until their TDD slice replaces the placeholders.
 
 This document describes the target API and maps it to the current PHP application. The first release is a single-store pharmacy system for medicine catalog, inventory and receiving, sales, staff accounts, and reports.
 
@@ -219,7 +219,7 @@ A sale has a stable ID, creation time, state (`open`, `completed`, or `cancelled
 
 ## Endpoints
 
-All paths below are relative to `/api/v1`. Unless marked public, endpoints require an authenticated session. Every target path is registered during the refactor; paths whose behavior is not implemented yet return `501 not_implemented` until their TDD slice replaces the placeholder.
+All paths below are relative to `/api/v1`. Unless marked public, endpoints require an authenticated session. Every target path is registered during the refactor; backup paths remain the only registered paths whose behavior is not implemented yet and currently return `501 not_implemented`.
 
 ### Transport
 
@@ -363,7 +363,7 @@ Cancel request:
 | `POST /users` | Admin | Create an account |
 | `GET /users/{userId}` | Admin | Read an account |
 | `PATCH /users/{userId}` | Admin | Update name, role, or active state |
-Create request fields are `username`, `fullName`, `password`, and `role`. Roles are `admin` or `staff`. The password-change request contains `currentPassword` and `newPassword`; the new password must be at least 12 characters and differ from the current password. Deactivate accounts instead of deleting users referenced by sales or inventory movements. Password reset for another user requires a separate audited workflow and is not part of this contract.
+Create request fields are `username`, `fullName`, `password`, and `role`. Roles are `admin` or `staff`. Account resources return `id`, `username`, `fullName`, `role`, `active`, `createdAt`, and `updatedAt`; encrypted database fields are decrypted only inside the server boundary. `GET /users` returns the standard `data` and pagination `meta` envelope and accepts `active`, `page`, and `perPage`. The password-change request contains `currentPassword` and `newPassword`; the new password must be at least 12 characters and differ from the current password. Deactivate accounts instead of deleting users referenced by sales or inventory movements. Password reset for another user requires a separate audited workflow and is not part of this contract.
 
 ### Reports
 
@@ -372,7 +372,7 @@ Create request fields are `username`, `fullName`, `password`, and `role`. Roles 
 | `GET /reports/inventory` | Admin, staff | Current stock, low-stock items, and expiring lots |
 | `GET /reports/sales` | Admin, staff | Sales count and gross sales totals for a date range |
 
-Report endpoints accept `from` and `to` dates and return aggregate data, not payment reconciliation. Inventory reports accept `lowStock` and `expiresBefore`. Reports are read-only and use the same pagination conventions when returning row-level results.
+Report endpoints accept `from` and `to` dates and return aggregate data, not payment reconciliation. `GET /reports/sales` returns `from`, `to`, `saleCount`, `grossSales`, `paidSaleCount`, `paidGrossSales`, and `cancelledSaleCount`; gross amounts are decimal strings with two fractional digits. `GET /reports/inventory` returns the same current-stock rows and pagination metadata as the inventory summary, and accepts `lowStock`, `expiresBefore`, `page`, and `perPage`. Reports are read-only and use the same pagination conventions when returning row-level results. Current Laravel state: both report endpoints are implemented and require an authenticated admin or staff session; inventory reporting reuses the inventory summary query and sales reporting sums completed and paid sale totals with integer-cent arithmetic.
 
 ### Backups and server time
 
