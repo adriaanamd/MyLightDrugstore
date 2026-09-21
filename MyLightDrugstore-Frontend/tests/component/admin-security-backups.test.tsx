@@ -10,13 +10,13 @@ describe("admin, security, and backup workflows", () => {
     render(<AdminUsersPage role="staff" users={[]} onDeactivate={vi.fn()} />)
 
     expect(screen.queryByText("Staff Accounts")).toBeNull()
-    expect(screen.getByText("Admin access required")).toBeInTheDocument()
+    expect(screen.getByText("Admin access required")).not.toBeNull()
   })
 
   it("downloads backup bytes through the encrypted transport adapter", async () => {
     const binaryPath: string[] = []
     const manager = createBackupManager({
-      download: async (id) => {
+      download: async (id: number) => {
         binaryPath.push(`/api/v1/backups/${id}/download`)
         return new Uint8Array([1, 2, 3])
       },
@@ -31,7 +31,7 @@ describe("admin, security, and backup workflows", () => {
   it("renders backup status and management actions", () => {
     render(<BackupsPage backups={[{ id: "backup-1", status: "ready" }]} onCreate={vi.fn()} />)
 
-    expect(screen.getByText("backup-1")).toBeInTheDocument()
-    expect(screen.getByText("ready")).toBeInTheDocument()
+    expect(screen.getByText("backup-1")).not.toBeNull()
+    expect(screen.getByText("ready")).not.toBeNull()
   })
 })
