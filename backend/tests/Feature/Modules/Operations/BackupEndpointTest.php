@@ -102,6 +102,18 @@ final class BackupEndpointTest extends TestCase
         $this->encryptedRequest('GET', '/api/v1/backups/999')->assertNotFound();
     }
 
+    public function test_backup_artifacts_follow_the_configured_private_prefix(): void
+    {
+        Config::set('backups.path_prefix', 'private-backups');
+        $this->actingAs($this->createUser('backup.staff', 'Backup Staff'), 'web');
+        $csrfToken = $this->csrfToken();
+
+        $response = $this->encryptedRequest('POST', '/api/v1/backups', [], $csrfToken)->assertAccepted();
+        $backupId = $this->responsePayload($response, 'POST', '/api/v1/backups')['data']['id'];
+
+        Storage::disk('local')->assertExists('private-backups/backup-'.$backupId.'.json.enc');
+    }
+
     private function createUser(string $username, string $fullName, StaffRole $role = StaffRole::Staff): User
     {
         $user = new User;
