@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Sales\Infrastructure\Persistence;
 
+use App\Modules\Sales\Application\SaleCancellationDetails;
 use App\Modules\Sales\Application\SaleDetails;
 use App\Modules\Sales\Application\SaleDetailsQuery;
 use DateTimeImmutable;
@@ -74,6 +75,28 @@ final class EloquentSaleDetailsQuery implements SaleDetailsQuery
             ];
         }
 
-        return new SaleDetails($id, $createdBy, $createdAt, $state, $paymentStatus, $total, $items);
+        $cancellationRecord = SaleCancellation::query()->where('sale_id', $id)->first();
+        $cancellation = null;
+
+        if ($cancellationRecord !== null) {
+            $cancelledBy = $cancellationRecord->getAttribute('actor_user_id');
+            $reason = $cancellationRecord->getAttribute('reason');
+            $cancelledAt = $cancellationRecord->getAttribute('cancelled_at');
+
+            if (
+                ! is_int($cancelledBy)
+                || ! is_string($reason)
+                || ! $cancelledAt instanceof DateTimeInterface
+            ) {
+                throw new LogicException('The sale cancellation persistence record contains invalid detail data.');
+            }
+
+            $cancelledAt = DateTimeImmutable::createFromInterface($cancelledAt)
+                ->setTimezone(new DateTimeZone('UTC'))
+                ->format('Y-m-d\TH:i:s\Z');
+            $cancellation = new SaleCancellationDetails($cancelledBy, $reason, $cancelledAt);
+        }
+
+        return new SaleDetails($id, $createdBy, $createdAt, $state, $paymentStatus, $total, $items, $cancellation);
     }
 }

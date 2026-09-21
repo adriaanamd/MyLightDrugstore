@@ -98,7 +98,7 @@ final class EloquentInventoryStockRestorer implements InventoryStockRestorer
                     'inventory_lot_id' => $lotId,
                     'sale_item_id' => $command->saleItemId,
                     'actor_user_id' => $command->actorUserId,
-                    'movement_type' => 'sale_item_removal',
+                    'movement_type' => $command->restorationType->value,
                     'quantity_delta' => $quantity,
                     'source_type' => 'sale',
                     'source_id' => $command->saleId,

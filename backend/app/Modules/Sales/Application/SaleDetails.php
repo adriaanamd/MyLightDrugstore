@@ -26,6 +26,7 @@ final readonly class SaleDetails
         public string $paymentStatus,
         public string $total,
         public array $items,
+        public ?SaleCancellationDetails $cancellation = null,
     ) {}
 
     /**
@@ -43,12 +44,13 @@ final readonly class SaleDetails
      *         unitPrice: string,
      *         lineTotal: string,
      *         state: string
-     *     }>
+     *     }>,
+     *     cancellation?: array{cancelledBy: int, reason: string, cancelledAt: string}
      * }
      */
     public function toArray(): array
     {
-        return [
+        $details = [
             'id' => $this->id,
             'createdBy' => $this->createdBy,
             'createdAt' => $this->createdAt,
@@ -57,6 +59,12 @@ final readonly class SaleDetails
             'total' => $this->total,
             'items' => $this->items,
         ];
+
+        if ($this->cancellation !== null) {
+            $details['cancellation'] = $this->cancellation->toArray();
+        }
+
+        return $details;
     }
 
     public static function fromArray(mixed $data): self
@@ -76,6 +84,19 @@ final readonly class SaleDetails
         }
 
         $items = [];
+        $cancellationData = $data['cancellation'] ?? null;
+
+        if (
+            $cancellationData !== null
+            && (
+                ! is_array($cancellationData)
+                || ! is_int($cancellationData['cancelledBy'] ?? null)
+                || ! is_string($cancellationData['reason'] ?? null)
+                || ! is_string($cancellationData['cancelledAt'] ?? null)
+            )
+        ) {
+            throw new LogicException('The stored sale cancellation response is invalid.');
+        }
 
         foreach ($data['items'] as $item) {
             if (
@@ -100,6 +121,14 @@ final readonly class SaleDetails
             ];
         }
 
+        $cancellation = is_array($cancellationData)
+            ? new SaleCancellationDetails(
+                $cancellationData['cancelledBy'],
+                $cancellationData['reason'],
+                $cancellationData['cancelledAt'],
+            )
+            : null;
+
         return new self(
             $data['id'],
             $data['createdBy'],
@@ -108,6 +137,7 @@ final readonly class SaleDetails
             $data['paymentStatus'],
             $data['total'],
             $items,
+            $cancellation,
         );
     }
 }

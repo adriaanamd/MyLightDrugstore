@@ -6,12 +6,14 @@ namespace App\Modules\Sales\Infrastructure;
 
 use App\Modules\ModuleName;
 use App\Modules\ModuleProvider;
+use App\Modules\Sales\Application\SaleCanceller;
 use App\Modules\Sales\Application\SaleCreator;
 use App\Modules\Sales\Application\SaleDetailsQuery;
 use App\Modules\Sales\Application\SaleItemAdder;
 use App\Modules\Sales\Application\SaleItemRemover;
 use App\Modules\Sales\Application\SaleListQuery;
 use App\Modules\Sales\Application\SalePaymentMarker;
+use App\Modules\Sales\Infrastructure\Persistence\EloquentSaleCanceller;
 use App\Modules\Sales\Infrastructure\Persistence\EloquentSaleCreator;
 use App\Modules\Sales\Infrastructure\Persistence\EloquentSaleDetailsQuery;
 use App\Modules\Sales\Infrastructure\Persistence\EloquentSaleItemAdder;
@@ -30,6 +32,7 @@ final class SalesModuleProvider implements ModuleProvider
     public function register(Container $container): void
     {
         $container->bind(SaleCreator::class, EloquentSaleCreator::class);
+        $container->bind(SaleCanceller::class, EloquentSaleCanceller::class);
         $container->bind(SaleItemAdder::class, EloquentSaleItemAdder::class);
         $container->bind(SaleItemRemover::class, EloquentSaleItemRemover::class);
         $container->bind(SaleDetailsQuery::class, EloquentSaleDetailsQuery::class);

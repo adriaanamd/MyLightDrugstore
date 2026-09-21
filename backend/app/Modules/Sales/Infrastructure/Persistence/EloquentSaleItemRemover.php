@@ -6,6 +6,7 @@ namespace App\Modules\Sales\Infrastructure\Persistence;
 
 use App\Modules\Inventory\Application\InventoryStockRestorer;
 use App\Modules\Inventory\Application\RestoreSaleItemStockCommand;
+use App\Modules\Inventory\Domain\SaleStockRestorationType;
 use App\Modules\Sales\Application\RemoveSaleItemCommand;
 use App\Modules\Sales\Application\SaleDetails;
 use App\Modules\Sales\Application\SaleDetailsQuery;
@@ -82,6 +83,7 @@ final class EloquentSaleItemRemover implements SaleItemRemover
                 $command->saleItemId,
                 $medicineId,
                 $quantity,
+                SaleStockRestorationType::SaleItemRemoval,
             ));
 
             $saleItem->setAttribute('state', 'removed');

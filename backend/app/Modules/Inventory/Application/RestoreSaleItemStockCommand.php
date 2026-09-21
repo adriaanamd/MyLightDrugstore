@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Inventory\Application;
 
+use App\Modules\Inventory\Domain\SaleStockRestorationType;
+
 final readonly class RestoreSaleItemStockCommand
 {
     public function __construct(
@@ -12,5 +14,6 @@ final readonly class RestoreSaleItemStockCommand
         public int $saleItemId,
         public int $medicineId,
         public int $quantity,
+        public SaleStockRestorationType $restorationType,
     ) {}
 }
