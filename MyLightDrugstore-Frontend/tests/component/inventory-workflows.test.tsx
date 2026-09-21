@@ -23,7 +23,11 @@ describe("inventory workflows", () => {
     await user.type(screen.getByLabelText("Unit cost"), "12.50")
     await user.click(screen.getByRole("button", { name: "Receive stock" }))
 
-    expect(submitted).toEqual({ medicineId: "med-1", quantity: 10, unitCost: 12.5 })
+    expect(submitted).toEqual({
+      medicineId: "med-1",
+      quantity: 10,
+      unitCost: 12.5,
+    })
   })
 
   it("submits a signed adjustment payload", async () => {
@@ -43,6 +47,10 @@ describe("inventory workflows", () => {
     await user.type(screen.getByLabelText("Reason"), "damaged")
     await user.click(screen.getByRole("button", { name: "Adjust stock" }))
 
-    expect(submitted).toEqual({ medicineId: "med-1", quantity: -2, reason: "damaged" })
+    expect(submitted).toEqual({
+      medicineId: "med-1",
+      quantity: -2,
+      reason: "damaged",
+    })
   })
 })
