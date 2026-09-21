@@ -5,6 +5,17 @@ export type AuthRouteContext = {
   session: Pick<SessionStore, "getSnapshot" | "bootstrap">
 }
 
+export function redirectHome({ session }: AuthRouteContext): never {
+  const snapshot = session.getSnapshot()
+
+  throw redirect({
+    to:
+      snapshot.status === "authenticated" && snapshot.user
+        ? "/dashboard"
+        : "/login",
+  })
+}
+
 export function requireAuthenticated({ session }: AuthRouteContext) {
   const snapshot = session.getSnapshot()
   if (snapshot.status !== "authenticated" || !snapshot.user) {
