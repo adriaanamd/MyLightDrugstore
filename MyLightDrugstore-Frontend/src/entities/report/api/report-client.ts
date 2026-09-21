@@ -1,10 +1,14 @@
 import type { TransportClient } from "@/shared/api"
-import type { ReportFilters, ReportResult } from "../model/types"
+import type {
+  InventoryReportResponse,
+  ReportFilters,
+  SalesReportResponse,
+} from "../model/types"
 
 export function createReportApi(client: Pick<TransportClient, "request">) {
   return {
     inventory(filters: ReportFilters = {}) {
-      return client.request<ReportResult>(
+      return client.request<InventoryReportResponse>(
         withQuery("/reports/inventory", filters),
         {
           method: "GET",
@@ -12,7 +16,7 @@ export function createReportApi(client: Pick<TransportClient, "request">) {
       )
     },
     sales(filters: ReportFilters = {}) {
-      return client.request<ReportResult>(
+      return client.request<SalesReportResponse>(
         withQuery("/reports/sales", filters),
         {
           method: "GET",

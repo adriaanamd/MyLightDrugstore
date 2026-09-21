@@ -1,2 +1,14 @@
 export { createReportApi } from "./api/report-client"
-export type { ReportFilters, ReportResult } from "./model/types"
+export {
+  mapInventoryReportResponse,
+  mapSalesReportResponse,
+} from "./model/mappers"
+export type {
+  InventoryReport,
+  InventoryReportResponse,
+  InventoryReportRow,
+  ReportFilters,
+  ReportResult,
+  SalesReport,
+  SalesReportResponse,
+} from "./model/types"
