@@ -101,6 +101,113 @@
 
 ---
 
+## Required Commit Granularity
+
+The implementation must produce at least 50 non-empty commits. This plan requires 55 commits, grouped as five coherent commits per major task. Each checkpoint must include the files in its scope, pass the stated focused verification, and use the exact commit message shown below. Do not create an aggregate task commit in addition to these checkpoints.
+
+For every checkpoint, stage only the listed scope and run the verification before committing:
+
+```powershell
+git add <listed-scope>
+git diff --cached --check
+<focused-verification>
+git commit -m "<message>"
+```
+
+The commit sequence is:
+
+### Task 1 checkpoints — toolchain and Figma removal
+
+1. `test(frontend): define package validation contract` — `scripts/package-validation.test.mjs`; verify the test fails against the current package.
+2. `build(frontend): install TanStack Start dependencies` — `package.json`, `pnpm-lock.yaml`; verify `pnpm install --frozen-lockfile`.
+3. `build(frontend): configure TanStack Start Vite integration` — `vite.config.ts`, `tsconfig.json`, `index.html`; verify package validation and `pnpm run build` after the shell exists.
+4. `chore(frontend): remove Figma runtime scaffold` — `.figma/`, `.gitignore`, Figma-only assets/imports; verify the scoped Figma scan returns no matches.
+5. `docs(frontend): document ordinary Start and FSD development` — `AGENTS.md`, `CLAUDE.md`, `README.md`; verify `rg -n -i figma MyLightDrugstore-Frontend` returns no matches.
+
+### Task 2 checkpoints — Start entry and application layer
+
+6. `test(frontend): add router smoke contract` — `tests/unit/router.test.ts`; verify the test fails because the route tree is absent.
+7. `feat(frontend): add Start client and server entries` — `src/client.tsx`, `src/server.ts`; verify `pnpm run typecheck`.
+8. `feat(frontend): add typed root route and providers` — `src/routes/__root.tsx`, `src/app/providers/app-providers.tsx`, `src/index.css`; verify the root route renders in `pnpm run build`.
+9. `feat(frontend): add authenticated route layout` — `src/routes/_authenticated.tsx`, `src/app/router/guards.ts`; verify authenticated redirect tests.
+10. `feat(frontend): add initial file-based route adapters` — `src/routes/index.tsx`, `src/routes/login.tsx`, `src/routes/_authenticated/dashboard.tsx`, `src/router.tsx`, `src/routeTree.gen.ts`; verify router smoke test and build.
+
+### Task 3 checkpoints — encrypted transport
+
+11. `test(frontend): specify canonical base64url behavior` — `tests/unit/base64url.test.ts`; verify the test fails before codec implementation.
+12. `feat(frontend): implement canonical base64url codec` — `src/shared/api/transport/base64url.ts`; verify base64url tests pass.
+13. `test(frontend): specify AES-GCM AAD and envelope failures` — `tests/unit/transport.test.ts`; verify the new crypto tests fail before implementation.
+14. `feat(frontend): implement RSA-OAEP and AES-GCM primitives` — `src/shared/api/transport/crypto.ts`, `src/shared/api/transport/envelope.ts`; verify crypto round-trip and AAD mismatch tests.
+15. `feat(frontend): implement encrypted Laravel transport client` — `src/shared/api/transport/client.ts`, `errors.ts`, `src/shared/api/index.ts`; verify JSON, bodyless, binary, and encrypted-error tests.
+
+### Task 4 checkpoints — API errors and entities
+
+16. `test(frontend): specify API error and request ID mapping` — `tests/unit/api-errors.test.ts`; verify the test fails before normalization exists.
+17. `feat(frontend): add API error normalization and environment config` — `src/shared/api/errors.ts`, `src/shared/api/request-id.ts`, `src/shared/config/env.ts`; verify error mapping tests and typecheck.
+18. `test(frontend): specify medicine and inventory adapter contracts` — `tests/unit/entity-contracts.test.ts`; verify contract tests fail before clients exist.
+19. `feat(frontend): add medicine and inventory entity slices` — `src/entities/medicine/**`, `src/entities/inventory/**`, `src/entities/user/**`; verify adapter contracts and typecheck.
+20. `feat(frontend): add sale report and backup entity slices` — `src/entities/sale/**`, `src/entities/report/**`, `src/entities/backup/**`; verify all entity contract tests.
+
+### Task 5 checkpoints — authentication
+
+21. `test(frontend): specify auth client request order` — `tests/unit/auth-session.test.ts`; verify CSRF/login tests fail before auth code exists.
+22. `feat(frontend): add Laravel auth client` — `src/features/auth/api/auth-client.ts`; verify exact `/auth/csrf`, `/auth/login`, `/auth/logout`, and `/auth/me` requests.
+23. `feat(frontend): add non-persistent session store` — `src/features/auth/model/session.ts`, `types.ts`, `use-session.ts`; verify bootstrap and storage-negative tests.
+24. `feat(frontend): add login feature and page` — `src/features/auth/ui/login-form.tsx`, `src/features/auth/index.ts`, `src/pages/login/login-page.tsx`; verify login component tests.
+25. `feat(frontend): connect auth providers and guards` — `src/app/providers/app-providers.tsx`, `src/app/router/guards.ts`, auth routes; verify auth tests, typecheck, and build.
+
+### Task 6 checkpoints — catalog and inventory
+
+26. `test(frontend): specify catalog mutation behavior` — `tests/component/catalog-page.test.tsx`; verify the catalog test fails before the feature exists.
+27. `feat(frontend): add catalog medicine editing feature` — `src/features/catalog-medicine-editing/**`; verify catalog mutation payload tests.
+28. `feat(frontend): add catalog page and widget` — `src/pages/catalog/catalog-page.tsx`, `src/widgets/catalog/**`, catalog route; verify catalog component tests and build.
+29. `test(frontend): specify inventory receipt and adjustment behavior` — `tests/component/inventory-workflows.test.tsx`; verify inventory tests fail before workflow slices exist.
+30. `feat(frontend): add inventory workflows and pages` — `src/features/inventory-receiving/**`, `src/features/inventory-adjustments/**`, `src/widgets/inventory/**`, `src/pages/inventory/**`, inventory routes; verify inventory component tests, typecheck, and build.
+
+### Task 7 checkpoints — sales and reports
+
+31. `test(frontend): specify sale creation and idempotency behavior` — the sale portion of `tests/component/sales-workflows.test.tsx`; verify it fails before sale features exist.
+32. `feat(frontend): add sale creation and cart action features` — `src/features/sale-creation/**`, `src/features/sale-cart-actions/**`; verify stable idempotency and mutation-path tests.
+33. `feat(frontend): add sales pages and print route` — `src/widgets/sales/**`, `src/pages/sales/**`, sales routes; verify cart, detail, cancel, mark-paid, and browser-print component tests.
+34. `test(frontend): specify report filters and response mapping` — `tests/component/reports.test.tsx`; verify report tests fail before report pages exist.
+35. `feat(frontend): add report widgets and pages` — `src/widgets/reports/**`, `src/pages/reports/**`, report routes; verify report tests, typecheck, and build.
+
+### Task 8 checkpoints — shell, security, users, and backups
+
+36. `test(frontend): specify admin permission and binary download behavior` — the admin/security/backup portion of `tests/component/admin-security-backups.test.tsx`; verify it fails before the features exist.
+37. `feat(frontend): add FSD application shell and navigation` — `src/widgets/app-shell/**`; verify shell navigation and server-time tests.
+38. `feat(frontend): add password-change feature and page` — `src/features/password-change/**`, `src/pages/security/security-page.tsx`, security route; verify password field mapping tests.
+39. `feat(frontend): add staff-management feature and page` — `src/features/staff-management/**`, `src/pages/admin/users-page.tsx`, admin route; verify admin guard and deactivate behavior.
+40. `feat(frontend): add backup-management feature and page` — `src/features/backup-management/**`, `src/pages/backups/backups-page.tsx`, backup route; verify encrypted binary download and request/status behavior.
+
+### Task 9 checkpoints — shared UI and architecture enforcement
+
+41. `refactor(frontend): split shared UI primitives` — `src/shared/ui/button.tsx`, `card.tsx`, `table.tsx`, `form.tsx`, `dialog.tsx`, `feedback.tsx`, `index.ts`; verify component tests and typecheck.
+42. `test(frontend): specify FSD layer boundary rules` — `scripts/check-fsd-boundaries.test.mjs`; verify fixture tests fail before the checker exists.
+43. `test(frontend): specify production source-size rules` — `scripts/check-source-size.test.mjs`; verify fixture tests fail before the checker exists.
+44. `test(frontend): add FSD boundary checker` — `scripts/check-fsd-boundaries.mjs`; verify layer order, legacy-root, upward-import, and deep-import checks.
+45. `test(frontend): add source-size checker and enforce architecture` — `scripts/check-source-size.mjs`, `package.json`; verify `pnpm run test:architecture` passes with no violations.
+
+### Task 10 checkpoints — CI and browser verification
+
+46. `test(frontend): specify frontend CI workflow contract` — `scripts/frontend-ci-contract.test.mjs`; verify it fails before the workflow exists.
+47. `ci(frontend): add locked quality-gate workflow` — `.github/workflows/frontend.yml`; verify workflow contract and YAML formatting.
+48. `test(frontend): add Playwright configuration and smoke fixture` — `playwright.config.ts`, `tests/e2e/smoke.spec.ts`; verify the smoke project discovers its tests.
+49. `test(frontend): cover authenticated pharmacy journeys` — `tests/e2e/auth-and-catalog.spec.ts`, `inventory-and-sales.spec.ts`; verify with the configured backend or report unavailable infrastructure exactly.
+50. `test(frontend): cover admin reports and print journeys` — `tests/e2e/admin-and-reports.spec.ts`; verify with the configured backend or report unavailable infrastructure exactly.
+
+### Task 11 checkpoints — legacy removal and final integration
+
+51. `refactor(frontend): remove local mock database` — `src/shared/api/client.ts`, `src/shared/api/seed.ts`; verify no `mockApi`, `MockApiClient`, or `createSeedDb` references remain.
+52. `refactor(frontend): remove legacy session and router imports` — `src/shared/SessionContext.tsx`, remaining old imports, and legacy root entry files; verify no `react-router` or persisted session references remain.
+53. `docs(frontend): add final application setup documentation` — `MyLightDrugstore-Frontend/README.md`; verify setup commands match `package.json` and mention encrypted Laravel API configuration without secrets.
+54. `test(frontend): add final route and trace verification` — final static trace checks and route inventory test; verify no Figma/mock/legacy traces and every accepted route exists.
+55. `docs(frontend): record final verification matrix` — add the final command/output matrix to `MyLightDrugstore-Frontend/README.md` after the preceding implementation; verify the full frontend and applicable backend gates immediately before committing.
+
+Each checkpoint is a real working-tree change. If a checkpoint would otherwise be empty because its content was already included in an earlier change, split the earlier change correctly and move the content into the checkpoint; never create an empty commit.
+
+---
+
 ### Task 1: Replace the Figma/Vite scaffold with a clean TanStack Start toolchain
 
 **Files:**
@@ -207,12 +314,9 @@ rg -n -i -uuu "figma" . -g '!node_modules/**' -g '!dist/**'
 
 Expected: package validation PASS and the Figma scan exits with no matches.
 
-- [ ] **Step 7: Commit the toolchain boundary**
+- [ ] **Step 7: Complete Task 1 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend .github/workflows/frontend.yml
-git commit -m "build(frontend): replace Figma scaffold with TanStack Start"
-```
+Complete commit checkpoints 1 through 5 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -320,12 +424,9 @@ pnpm run build
 
 Expected: router test PASS, TypeScript exit 0, and Vite produce the TanStack Start build.
 
-- [ ] **Step 7: Commit the application shell**
+- [ ] **Step 7: Complete Task 2 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src
-git commit -m "feat(frontend): add TanStack Start application shell"
-```
+Complete commit checkpoints 6 through 10 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -435,12 +536,9 @@ pnpm run typecheck
 
 Expected: all transport tests PASS and TypeScript exit 0.
 
-- [ ] **Step 7: Commit the transport boundary**
+- [ ] **Step 7: Complete Task 3 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src/shared/api MyLightDrugstore-Frontend/tests/unit
-git commit -m "feat(frontend): add encrypted Laravel transport client"
-```
+Complete commit checkpoints 11 through 15 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -524,12 +622,9 @@ pnpm run format:check
 
 Expected: all contract tests PASS, typecheck exit 0, and format check exit 0.
 
-- [ ] **Step 6: Commit entity/API contracts**
+- [ ] **Step 6: Complete Task 4 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src/entities MyLightDrugstore-Frontend/src/shared MyLightDrugstore-Frontend/tests/unit/entity-contracts.test.ts
-git commit -m "feat(frontend): add typed Laravel entity adapters"
-```
+Complete commit checkpoints 16 through 20 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -612,12 +707,9 @@ pnpm run build
 
 Expected: all listed tests PASS, typecheck exit 0, and build exit 0.
 
-- [ ] **Step 7: Commit authentication**
+- [ ] **Step 7: Complete Task 5 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src/app MyLightDrugstore-Frontend/src/features/auth MyLightDrugstore-Frontend/src/pages/login MyLightDrugstore-Frontend/src/pages/dashboard MyLightDrugstore-Frontend/src/routes MyLightDrugstore-Frontend/tests
-git commit -m "feat(frontend): wire session authentication to Laravel"
-```
+Complete commit checkpoints 21 through 25 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -722,12 +814,9 @@ pnpm run build
 
 Expected: all focused tests PASS, typecheck exit 0, and build exit 0.
 
-- [ ] **Step 7: Commit catalog/inventory migration**
+- [ ] **Step 7: Complete Task 6 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src/entities MyLightDrugstore-Frontend/src/features MyLightDrugstore-Frontend/src/widgets MyLightDrugstore-Frontend/src/pages MyLightDrugstore-Frontend/src/routes MyLightDrugstore-Frontend/tests/component
-git commit -m "feat(frontend): migrate catalog and inventory workflows"
-```
+Complete commit checkpoints 26 through 30 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -826,12 +915,9 @@ pnpm run build
 
 Expected: all focused tests PASS, typecheck exit 0, and build exit 0.
 
-- [ ] **Step 7: Commit sales/report migration**
+- [ ] **Step 7: Complete Task 7 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src/entities MyLightDrugstore-Frontend/src/features MyLightDrugstore-Frontend/src/widgets MyLightDrugstore-Frontend/src/pages MyLightDrugstore-Frontend/src/routes MyLightDrugstore-Frontend/tests/component
-git commit -m "feat(frontend): migrate sales and reporting workflows"
-```
+Complete commit checkpoints 31 through 35 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -912,12 +998,9 @@ pnpm run build
 
 Expected: all focused tests PASS, typecheck exit 0, and build exit 0.
 
-- [ ] **Step 6: Commit admin/security/shell migration**
+- [ ] **Step 6: Complete Task 8 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src MyLightDrugstore-Frontend/tests/component
-git commit -m "feat(frontend): migrate shell security users and backups"
-```
+Complete commit checkpoints 36 through 40 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -989,12 +1072,9 @@ pnpm run format:check
 
 Expected: all commands exit 0 with no legacy-root, upward-import, deep-import, or source-size violations.
 
-- [ ] **Step 6: Commit FSD enforcement**
+- [ ] **Step 6: Complete Task 9 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend/src/shared/ui MyLightDrugstore-Frontend/scripts
-git commit -m "test(frontend): enforce Botchabuster FSD boundaries"
-```
+Complete commit checkpoints 41 through 45 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -1087,12 +1167,9 @@ pnpm run build
 
 Expected: all commands exit 0. Validate YAML with the repository's available YAML parser or `npx prettier --check .github/workflows/frontend.yml` without changing the workflow after validation.
 
-- [ ] **Step 6: Commit frontend CI**
+- [ ] **Step 6: Complete Task 10 commit checkpoints**
 
-```powershell
-git add .github/workflows/frontend.yml MyLightDrugstore-Frontend
-git commit -m "ci(frontend): gate TanStack Start and FSD quality"
-```
+Complete commit checkpoints 46 through 50 in the Required Commit Granularity section. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -1163,12 +1240,9 @@ git diff --name-only HEAD -- MyLightDrugstore-Frontend .github/workflows/fronten
 
 Confirm the diff contains only the frontend refactor, frontend CI, and its documentation. Do not stage or revert the pre-existing backend deletions/untracked changes outside this task.
 
-- [ ] **Step 5: Commit the final cleanup only after all gates pass**
+- [ ] **Step 5: Complete Task 11 commit checkpoints**
 
-```powershell
-git add MyLightDrugstore-Frontend .github/workflows/frontend.yml
-git commit -m "refactor(frontend): complete Laravel TanStack Start FSD cutover"
-```
+Complete commit checkpoints 51 through 55 only after the full frontend and applicable backend gates pass. Do not create an additional aggregate commit for this task.
 
 ---
 
@@ -1178,3 +1252,4 @@ git commit -m "refactor(frontend): complete Laravel TanStack Start FSD cutover"
 - Placeholder scan: no incomplete markers or unspecified implementation steps are used.
 - Type consistency: route, client, session, entity, feature, and checker interfaces are named consistently across tasks.
 - Scope: the work remains one frontend cutover with independently testable migration phases; no Laravel business logic changes are planned.
+- Commit granularity: the plan now requires 55 non-empty, scoped commits and explicitly replaces the former 11 aggregate task commits.
