@@ -59,7 +59,9 @@ test("sale adapter maps sale lifecycle requests", async () => {
   await api.create({
     customerName: "Walk-in",
     items: [{ medicineId: "med-1", quantity: 2 }],
-  })
+  }, "sale-key")
+  await api.addItem("sale-1", { medicineId: "med-2", quantity: 1 }, "item-key")
+  await api.removeItem("sale-1", "item-1")
   await api.markPaid("sale-1")
   await api.cancel("sale-1", "duplicate")
 
@@ -68,11 +70,19 @@ test("sale adapter maps sale lifecycle requests", async () => {
     {
       path: "/sales",
       method: "POST",
+      headers: { "Idempotency-Key": "sale-key" },
       body: {
         customerName: "Walk-in",
         items: [{ medicineId: "med-1", quantity: 2 }],
       },
     },
+    {
+      path: "/sales/sale-1/items",
+      method: "POST",
+      headers: { "Idempotency-Key": "item-key" },
+      body: { medicineId: "med-2", quantity: 1 },
+    },
+    { path: "/sales/sale-1/items/item-1", method: "DELETE" },
     { path: "/sales/sale-1/mark-paid", method: "POST" },
     {
       path: "/sales/sale-1/cancel",
