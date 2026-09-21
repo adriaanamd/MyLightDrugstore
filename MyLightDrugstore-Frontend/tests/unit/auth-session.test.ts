@@ -6,7 +6,7 @@ test("auth client bootstraps CSRF before login and keeps Laravel paths exact", a
   const calls: unknown[] = []
   const auth = createAuthClient(fakeClient(calls))
 
-  await auth.login({ email: "staff@example.test", password: "secret" })
+  await auth.login({ username: "staff", password: "secret" })
   await auth.me()
   await auth.logout()
 
@@ -15,7 +15,7 @@ test("auth client bootstraps CSRF before login and keeps Laravel paths exact", a
     {
       path: "/auth/login",
       method: "POST",
-      body: { email: "staff@example.test", password: "secret" },
+      body: { username: "staff", password: "secret" },
     },
     { path: "/auth/me", method: "GET" },
     { path: "/auth/logout", method: "POST" },
@@ -24,7 +24,13 @@ test("auth client bootstraps CSRF before login and keeps Laravel paths exact", a
 
 function fakeClient(calls: unknown[]) {
   return {
-    async request<T>(path: string, init: { method?: string; body?: unknown } = {}) {
+    async request<T,>(
+      path: string,
+      init: {
+        method?: string
+        body?: unknown
+      } = {},
+    ) {
       calls.push({ path, ...init })
       return { data: {} as T, status: 200, headers: new Headers() }
     },
