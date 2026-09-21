@@ -13,9 +13,20 @@ export function PageHeader({
   subtitle?: string
   action?: ReactNode
 }) {
-  return <header><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}{action}</header>
+  return (
+    <header>
+      <h1>{title}</h1>
+      {subtitle && <p>{subtitle}</p>}
+      {action}
+    </header>
+  )
 }
 
-export function StatCard({ label, value }: { label: string; value: ReactNode }) {
-  return <Card><p>{label}</p><strong>{value}</strong></Card>
+export function StatCard({ label, value }: { label: string value: ReactNode }) {
+  return (
+    <Card>
+      <p>{label}</p>
+      <strong>{value}</strong>
+    </Card>
+  )
 }

@@ -36,11 +36,14 @@ describe("reports", () => {
 
   it("submits date filters from both report pages", async () => {
     const user = userEvent.setup()
-    const filters: Array<{ from?: string; to?: string }> = []
+    const filters: Array<{ from?: string to?: string }> = []
 
     render(
       <>
-        <InventoryReportPage rows={[]} onFilter={(value) => filters.push(value)} />
+        <InventoryReportPage
+          rows={[]}
+          onFilter={(value) => filters.push(value)}
+        />
         <SalesReportPage
           report={{
             saleCount: 0,
@@ -56,12 +59,13 @@ describe("reports", () => {
 
     await user.type(screen.getByLabelText("Inventory from"), "2026-09-01")
     await user.type(screen.getByLabelText("Sales to"), "2026-09-22")
-    await user.click(screen.getByRole("button", { name: "Apply inventory filters" }))
-    await user.click(screen.getByRole("button", { name: "Apply sales filters" }))
+    await user.click(
+      screen.getByRole("button", { name: "Apply inventory filters" }),
+    )
+    await user.click(
+      screen.getByRole("button", { name: "Apply sales filters" }),
+    )
 
-    expect(filters).toEqual([
-      { from: "2026-09-01" },
-      { to: "2026-09-22" },
-    ])
+    expect(filters).toEqual([{ from: "2026-09-01" }, { to: "2026-09-22" }])
   })
 })

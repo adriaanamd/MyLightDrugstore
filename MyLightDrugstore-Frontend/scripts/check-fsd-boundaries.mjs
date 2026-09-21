@@ -1,7 +1,14 @@
 import { readdir, readFile } from "node:fs/promises"
 import { join, relative, sep } from "node:path"
 
-export const layerOrder = ["shared", "entities", "features", "widgets", "pages", "app"]
+export const layerOrder = [
+  "shared",
+  "entities",
+  "features",
+  "widgets",
+  "pages",
+  "app",
+]
 const productionExtensions = new Set([".ts", ".tsx", ".js", ".jsx"])
 const allowedRootFiles = new Set([
   "client.tsx",
@@ -40,7 +47,11 @@ export async function findViolations(projectRoot) {
         targetLayer === importerLayer &&
         isDeepCrossSliceImport(importerLayer, sourceRel, target)
       ) {
-        violations.push({ file: rel, importPath, rule: "deep-cross-slice-import" })
+        violations.push({
+          file: rel,
+          importPath,
+          rule: "deep-cross-slice-import",
+        })
       }
     }
   }
@@ -49,7 +60,9 @@ export async function findViolations(projectRoot) {
 }
 
 function layerFor(sourceRel) {
-  const match = sourceRel.match(/^(shared|entities|features|widgets|pages|app)(?:\/|$)/)
+  const match = sourceRel.match(
+    /^(shared|entities|features|widgets|pages|app)(?:\/|$)/,
+  )
   return match?.[1]
 }
 
@@ -71,7 +84,9 @@ function importsFrom(source) {
 }
 
 async function collectFiles(directory) {
-  const entries = await readdir(directory, { withFileTypes: true }).catch(() => [])
+  const entries = await readdir(directory, { withFileTypes: true }).catch(
+    () => [],
+  )
   const files = []
   for (const entry of entries) {
     const path = join(directory, entry.name)

@@ -1,7 +1,11 @@
 import type { ReactNode } from "react"
 
 export function Table({ children }: { children: ReactNode }) {
-  return <div><table>{children}</table></div>
+  return (
+    <div>
+      <table>{children}</table>
+    </div>
+  )
 }
 
 export function Th({ children }: { children?: ReactNode }) {

@@ -12,6 +12,17 @@ export function ErrorBanner({ message }: { message: string }) {
   return <p role="alert">{message}</p>
 }
 
-export function EmptyState({ title, description }: { title: string; description?: string }) {
-  return <section><h2>{title}</h2>{description && <p>{description}</p>}</section>
+export function EmptyState({
+  title,
+  description,
+}: {
+  title: string
+  description?: string
+}) {
+  return (
+    <section>
+      <h2>{title}</h2>
+      {description && <p>{description}</p>}
+    </section>
+  )
 }

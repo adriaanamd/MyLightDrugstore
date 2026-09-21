@@ -29,7 +29,12 @@ describe("admin, security, and backup workflows", () => {
   })
 
   it("renders backup status and management actions", () => {
-    render(<BackupsPage backups={[{ id: "backup-1", status: "ready" }]} onCreate={vi.fn()} />)
+    render(
+      <BackupsPage
+        backups={[{ id: "backup-1", status: "ready" }]}
+        onCreate={vi.fn()}
+      />,
+    )
 
     expect(screen.getByText("backup-1")).not.toBeNull()
     expect(screen.getByText("ready")).not.toBeNull()

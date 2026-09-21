@@ -16,11 +16,26 @@ export function SalesReportWidget({
         onSubmit={onFilter}
       />
       <dl>
-        <div><dt>Sales count</dt><dd>{report.saleCount}</dd></div>
-        <div><dt>Gross sales</dt><dd>{report.grossSales}</dd></div>
-        <div><dt>Paid sales</dt><dd>{report.paidSaleCount}</dd></div>
-        <div><dt>Paid gross sales</dt><dd>{report.paidGrossSales}</dd></div>
-        <div><dt>Cancelled sales</dt><dd>{report.cancelledSaleCount}</dd></div>
+        <div>
+          <dt>Sales count</dt>
+          <dd>{report.saleCount}</dd>
+        </div>
+        <div>
+          <dt>Gross sales</dt>
+          <dd>{report.grossSales}</dd>
+        </div>
+        <div>
+          <dt>Paid sales</dt>
+          <dd>{report.paidSaleCount}</dd>
+        </div>
+        <div>
+          <dt>Paid gross sales</dt>
+          <dd>{report.paidGrossSales}</dd>
+        </div>
+        <div>
+          <dt>Cancelled sales</dt>
+          <dd>{report.cancelledSaleCount}</dd>
+        </div>
       </dl>
     </section>
   )

@@ -14,11 +14,19 @@ export function BackupsPage({
       <header>
         <p>Administration</p>
         <h1>Backups</h1>
-        <button type="button" onClick={() => void onCreate()}>Request backup</button>
+        <button type="button" onClick={() => void onCreate()}>
+          Request backup
+        </button>
       </header>
       <table>
         <caption>Backup jobs</caption>
-        <thead><tr><th>Backup</th><th>Status</th><th /></tr></thead>
+        <thead>
+          <tr>
+            <th>Backup</th>
+            <th>Status</th>
+            <th />
+          </tr>
+        </thead>
         <tbody>
           {backups.map((backup) => (
             <tr key={backup.id}>
@@ -26,7 +34,10 @@ export function BackupsPage({
               <td>{backup.status ?? "pending"}</td>
               <td>
                 {onDownload && backup.status === "ready" && (
-                  <button type="button" onClick={() => void onDownload(backup.id)}>
+                  <button
+                    type="button"
+                    onClick={() => void onDownload(backup.id)}
+                  >
                     Download
                   </button>
                 )}

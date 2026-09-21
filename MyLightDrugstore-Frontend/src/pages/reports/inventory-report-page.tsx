@@ -10,7 +10,10 @@ export function InventoryReportPage({
 }) {
   return (
     <main>
-      <header><p>Operations</p><h1>Inventory report</h1></header>
+      <header>
+        <p>Operations</p>
+        <h1>Inventory report</h1>
+      </header>
       <InventoryReportWidget rows={rows} onFilter={onFilter} />
     </main>
   )

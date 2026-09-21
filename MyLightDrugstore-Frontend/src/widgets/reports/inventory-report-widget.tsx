@@ -18,7 +18,11 @@ export function InventoryReportWidget({
       <table>
         <caption>Current stock by medicine</caption>
         <thead>
-          <tr><th>Medicine</th><th>Stock</th><th>Expiry</th></tr>
+          <tr>
+            <th>Medicine</th>
+            <th>Stock</th>
+            <th>Expiry</th>
+          </tr>
         </thead>
         <tbody>
           {rows.map((row) => (

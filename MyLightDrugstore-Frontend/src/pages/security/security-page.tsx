@@ -8,7 +8,10 @@ export function SecurityPage({
 }) {
   return (
     <main>
-      <header><p>Account</p><h1>Change password</h1></header>
+      <header>
+        <p>Account</p>
+        <h1>Change password</h1>
+      </header>
       <PasswordChangeForm onChange={onChange} />
     </main>
   )

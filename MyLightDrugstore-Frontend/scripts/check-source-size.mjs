@@ -16,7 +16,9 @@ export async function findSourceSizeViolations(projectRoot, limit = 300) {
 }
 
 async function collectFiles(directory) {
-  const entries = await readdir(directory, { withFileTypes: true }).catch(() => [])
+  const entries = await readdir(directory, { withFileTypes: true }).catch(
+    () => [],
+  )
   const files = []
   for (const entry of entries) {
     const file = join(directory, entry.name)

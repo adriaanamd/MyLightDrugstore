@@ -8,203 +8,159 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedBackupsRouteImport } from './routes/_authenticated/backups'
-import { Route as AuthenticatedCatalogRouteImport } from './routes/_authenticated/catalog'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
-import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
-import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
-import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_authenticated/reports/inventory'
-import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports/sales'
-import { Route as AuthenticatedSalesSaleIdRouteImport } from './routes/_authenticated/sales/$saleId'
-import { Route as AuthenticatedSalesNewRouteImport } from './routes/_authenticated/sales/new'
-import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings/security'
-import { Route as AuthenticatedSalesSaleIdPrintRouteImport } from './routes/_authenticated/sales/$saleId/print'
+import { Route as rootRouteImport } from "./routes/__root"
+import { Route as IndexRouteImport } from "./routes/index"
+import { Route as AuthenticatedRouteImport } from "./routes/_authenticated"
+import { Route as LoginRouteImport } from "./routes/login"
+import { Route as AuthenticatedBackupsRouteImport } from "./routes/_authenticated/backups"
+import { Route as AuthenticatedCatalogRouteImport } from "./routes/_authenticated/catalog"
+import { Route as AuthenticatedDashboardRouteImport } from "./routes/_authenticated/dashboard"
+import { Route as AuthenticatedInventoryRouteImport } from "./routes/_authenticated/inventory"
+import { Route as AuthenticatedSalesRouteImport } from "./routes/_authenticated/sales"
+import { Route as AuthenticatedAdminUsersRouteImport } from "./routes/_authenticated/admin/users"
+import { Route as AuthenticatedReportsInventoryRouteImport } from "./routes/_authenticated/reports/inventory"
+import { Route as AuthenticatedReportsSalesRouteImport } from "./routes/_authenticated/reports/sales"
+import { Route as AuthenticatedSalesSaleIdRouteImport } from "./routes/_authenticated/sales/$saleId"
+import { Route as AuthenticatedSalesNewRouteImport } from "./routes/_authenticated/sales/new"
+import { Route as AuthenticatedSettingsSecurityRouteImport } from "./routes/_authenticated/settings/security"
+import { Route as AuthenticatedSalesSaleIdPrintRouteImport } from "./routes/_authenticated/sales/$saleId/print"
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+  id: "/_authenticated",
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedBackupsRoute = AuthenticatedBackupsRouteImport.update({
-  id: '/backups',
-  path: '/backups',
+  id: "/backups",
+  path: "/backups",
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCatalogRoute = AuthenticatedCatalogRouteImport.update({
-  id: '/catalog',
-  path: '/catalog',
+  id: "/catalog",
+  path: "/catalog",
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+  id: "/dashboard",
+  path: "/dashboard",
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
-  id: '/inventory',
-  path: '/inventory',
+  id: "/inventory",
+  path: "/inventory",
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
-  id: '/sales',
-  path: '/sales',
+  id: "/sales",
+  path: "/sales",
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
+  id: "/admin/users",
+  path: "/admin/users",
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedReportsInventoryRoute =
   AuthenticatedReportsInventoryRouteImport.update({
-    id: '/reports/inventory',
-    path: '/reports/inventory',
+    id: "/reports/inventory",
+    path: "/reports/inventory",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedReportsSalesRoute =
   AuthenticatedReportsSalesRouteImport.update({
-    id: '/reports/sales',
-    path: '/reports/sales',
+    id: "/reports/sales",
+    path: "/reports/sales",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedSalesSaleIdRoute =
   AuthenticatedSalesSaleIdRouteImport.update({
-    id: '/$saleId',
-    path: '/$saleId',
+    id: "/$saleId",
+    path: "/$saleId",
     getParentRoute: () => AuthenticatedSalesRoute,
   } as any)
 const AuthenticatedSalesNewRoute = AuthenticatedSalesNewRouteImport.update({
-  id: '/new',
-  path: '/new',
+  id: "/new",
+  path: "/new",
   getParentRoute: () => AuthenticatedSalesRoute,
 } as any)
 const AuthenticatedSettingsSecurityRoute =
   AuthenticatedSettingsSecurityRouteImport.update({
-    id: '/settings/security',
-    path: '/settings/security',
+    id: "/settings/security",
+    path: "/settings/security",
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedSalesSaleIdPrintRoute =
   AuthenticatedSalesSaleIdPrintRouteImport.update({
-    id: '/print',
-    path: '/print',
+    id: "/print",
+    path: "/print",
     getParentRoute: () => AuthenticatedSalesSaleIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/backups': typeof AuthenticatedBackupsRoute
-  '/catalog': typeof AuthenticatedCatalogRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/inventory': typeof AuthenticatedInventoryRoute
-  '/sales': typeof AuthenticatedSalesRouteWithChildren
-  '/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
-  '/reports/sales': typeof AuthenticatedReportsSalesRoute
-  '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
-  '/sales/new': typeof AuthenticatedSalesNewRoute
-  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
-  '/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
+  "/": typeof IndexRoute
+  "/login": typeof LoginRoute
+  "/backups": typeof AuthenticatedBackupsRoute
+  "/catalog": typeof AuthenticatedCatalogRoute
+  "/dashboard": typeof AuthenticatedDashboardRoute
+  "/inventory": typeof AuthenticatedInventoryRoute
+  "/sales": typeof AuthenticatedSalesRouteWithChildren
+  "/admin/users": typeof AuthenticatedAdminUsersRoute
+  "/reports/inventory": typeof AuthenticatedReportsInventoryRoute
+  "/reports/sales": typeof AuthenticatedReportsSalesRoute
+  "/sales/$saleId": typeof AuthenticatedSalesSaleIdRouteWithChildren
+  "/sales/new": typeof AuthenticatedSalesNewRoute
+  "/settings/security": typeof AuthenticatedSettingsSecurityRoute
+  "/sales/$saleId/print": typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/login': typeof LoginRoute
-  '/backups': typeof AuthenticatedBackupsRoute
-  '/catalog': typeof AuthenticatedCatalogRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/inventory': typeof AuthenticatedInventoryRoute
-  '/sales': typeof AuthenticatedSalesRouteWithChildren
-  '/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
-  '/reports/sales': typeof AuthenticatedReportsSalesRoute
-  '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
-  '/sales/new': typeof AuthenticatedSalesNewRoute
-  '/settings/security': typeof AuthenticatedSettingsSecurityRoute
-  '/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
+  "/": typeof IndexRoute
+  "/login": typeof LoginRoute
+  "/backups": typeof AuthenticatedBackupsRoute
+  "/catalog": typeof AuthenticatedCatalogRoute
+  "/dashboard": typeof AuthenticatedDashboardRoute
+  "/inventory": typeof AuthenticatedInventoryRoute
+  "/sales": typeof AuthenticatedSalesRouteWithChildren
+  "/admin/users": typeof AuthenticatedAdminUsersRoute
+  "/reports/inventory": typeof AuthenticatedReportsInventoryRoute
+  "/reports/sales": typeof AuthenticatedReportsSalesRoute
+  "/sales/$saleId": typeof AuthenticatedSalesSaleIdRouteWithChildren
+  "/sales/new": typeof AuthenticatedSalesNewRoute
+  "/settings/security": typeof AuthenticatedSettingsSecurityRoute
+  "/sales/$saleId/print": typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/login': typeof LoginRoute
-  '/_authenticated/backups': typeof AuthenticatedBackupsRoute
-  '/_authenticated/catalog': typeof AuthenticatedCatalogRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
-  '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
-  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/_authenticated/reports/inventory': typeof AuthenticatedReportsInventoryRoute
-  '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
-  '/_authenticated/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
-  '/_authenticated/sales/new': typeof AuthenticatedSalesNewRoute
-  '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
-  '/_authenticated/sales/$saleId/print': typeof AuthenticatedSalesSaleIdPrintRoute
+  "/": typeof IndexRoute
+  "/_authenticated": typeof AuthenticatedRouteWithChildren
+  "/login": typeof LoginRoute
+  "/_authenticated/backups": typeof AuthenticatedBackupsRoute
+  "/_authenticated/catalog": typeof AuthenticatedCatalogRoute
+  "/_authenticated/dashboard": typeof AuthenticatedDashboardRoute
+  "/_authenticated/inventory": typeof AuthenticatedInventoryRoute
+  "/_authenticated/sales": typeof AuthenticatedSalesRouteWithChildren
+  "/_authenticated/admin/users": typeof AuthenticatedAdminUsersRoute
+  "/_authenticated/reports/inventory": typeof AuthenticatedReportsInventoryRoute
+  "/_authenticated/reports/sales": typeof AuthenticatedReportsSalesRoute
+  "/_authenticated/sales/$saleId": typeof AuthenticatedSalesSaleIdRouteWithChildren
+  "/_authenticated/sales/new": typeof AuthenticatedSalesNewRoute
+  "/_authenticated/settings/security": typeof AuthenticatedSettingsSecurityRoute
+  "/_authenticated/sales/$saleId/print": typeof AuthenticatedSalesSaleIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/login'
-    | '/backups'
-    | '/catalog'
-    | '/dashboard'
-    | '/inventory'
-    | '/sales'
-    | '/admin/users'
-    | '/reports/inventory'
-    | '/reports/sales'
-    | '/sales/$saleId'
-    | '/sales/new'
-    | '/settings/security'
-    | '/sales/$saleId/print'
+  fullPaths: "/" | "/login" | "/backups" | "/catalog" | "/dashboard" | "/inventory" | "/sales" | "/admin/users" | "/reports/inventory" | "/reports/sales" | "/sales/$saleId" | "/sales/new" | "/settings/security" | "/sales/$saleId/print"
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/login'
-    | '/backups'
-    | '/catalog'
-    | '/dashboard'
-    | '/inventory'
-    | '/sales'
-    | '/admin/users'
-    | '/reports/inventory'
-    | '/reports/sales'
-    | '/sales/$saleId'
-    | '/sales/new'
-    | '/settings/security'
-    | '/sales/$saleId/print'
-  id:
-    | '__root__'
-    | '/'
-    | '/_authenticated'
-    | '/login'
-    | '/_authenticated/backups'
-    | '/_authenticated/catalog'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/inventory'
-    | '/_authenticated/sales'
-    | '/_authenticated/admin/users'
-    | '/_authenticated/reports/inventory'
-    | '/_authenticated/reports/sales'
-    | '/_authenticated/sales/$saleId'
-    | '/_authenticated/sales/new'
-    | '/_authenticated/settings/security'
-    | '/_authenticated/sales/$saleId/print'
+  to: "/" | "/login" | "/backups" | "/catalog" | "/dashboard" | "/inventory" | "/sales" | "/admin/users" | "/reports/inventory" | "/reports/sales" | "/sales/$saleId" | "/sales/new" | "/settings/security" | "/sales/$saleId/print"
+  id: "__root__" | "/" | "/_authenticated" | "/login" | "/_authenticated/backups" | "/_authenticated/catalog" | "/_authenticated/dashboard" | "/_authenticated/inventory" | "/_authenticated/sales" | "/_authenticated/admin/users" | "/_authenticated/reports/inventory" | "/_authenticated/reports/sales" | "/_authenticated/sales/$saleId" | "/_authenticated/sales/new" | "/_authenticated/settings/security" | "/_authenticated/sales/$saleId/print"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -213,110 +169,110 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
+    "/": {
+      id: "/"
+      path: "/"
+      fullPath: "/"
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
+    "/_authenticated": {
+      id: "/_authenticated"
+      path: ""
+      fullPath: "/"
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
+    "/login": {
+      id: "/login"
+      path: "/login"
+      fullPath: "/login"
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/backups': {
-      id: '/_authenticated/backups'
-      path: '/backups'
-      fullPath: '/backups'
+    "/_authenticated/backups": {
+      id: "/_authenticated/backups"
+      path: "/backups"
+      fullPath: "/backups"
       preLoaderRoute: typeof AuthenticatedBackupsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/catalog': {
-      id: '/_authenticated/catalog'
-      path: '/catalog'
-      fullPath: '/catalog'
+    "/_authenticated/catalog": {
+      id: "/_authenticated/catalog"
+      path: "/catalog"
+      fullPath: "/catalog"
       preLoaderRoute: typeof AuthenticatedCatalogRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
+    "/_authenticated/dashboard": {
+      id: "/_authenticated/dashboard"
+      path: "/dashboard"
+      fullPath: "/dashboard"
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/inventory': {
-      id: '/_authenticated/inventory'
-      path: '/inventory'
-      fullPath: '/inventory'
+    "/_authenticated/inventory": {
+      id: "/_authenticated/inventory"
+      path: "/inventory"
+      fullPath: "/inventory"
       preLoaderRoute: typeof AuthenticatedInventoryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/sales': {
-      id: '/_authenticated/sales'
-      path: '/sales'
-      fullPath: '/sales'
+    "/_authenticated/sales": {
+      id: "/_authenticated/sales"
+      path: "/sales"
+      fullPath: "/sales"
       preLoaderRoute: typeof AuthenticatedSalesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin/users': {
-      id: '/_authenticated/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
+    "/_authenticated/admin/users": {
+      id: "/_authenticated/admin/users"
+      path: "/admin/users"
+      fullPath: "/admin/users"
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/reports/inventory': {
-      id: '/_authenticated/reports/inventory'
-      path: '/reports/inventory'
-      fullPath: '/reports/inventory'
+    "/_authenticated/reports/inventory": {
+      id: "/_authenticated/reports/inventory"
+      path: "/reports/inventory"
+      fullPath: "/reports/inventory"
       preLoaderRoute: typeof AuthenticatedReportsInventoryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/reports/sales': {
-      id: '/_authenticated/reports/sales'
-      path: '/reports/sales'
-      fullPath: '/reports/sales'
+    "/_authenticated/reports/sales": {
+      id: "/_authenticated/reports/sales"
+      path: "/reports/sales"
+      fullPath: "/reports/sales"
       preLoaderRoute: typeof AuthenticatedReportsSalesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/sales/$saleId': {
-      id: '/_authenticated/sales/$saleId'
-      path: '/$saleId'
-      fullPath: '/sales/$saleId'
+    "/_authenticated/sales/$saleId": {
+      id: "/_authenticated/sales/$saleId"
+      path: "/$saleId"
+      fullPath: "/sales/$saleId"
       preLoaderRoute: typeof AuthenticatedSalesSaleIdRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
     }
-    '/_authenticated/sales/new': {
-      id: '/_authenticated/sales/new'
-      path: '/new'
-      fullPath: '/sales/new'
+    "/_authenticated/sales/new": {
+      id: "/_authenticated/sales/new"
+      path: "/new"
+      fullPath: "/sales/new"
       preLoaderRoute: typeof AuthenticatedSalesNewRouteImport
       parentRoute: typeof AuthenticatedSalesRoute
     }
-    '/_authenticated/settings/security': {
-      id: '/_authenticated/settings/security'
-      path: '/settings/security'
-      fullPath: '/settings/security'
+    "/_authenticated/settings/security": {
+      id: "/_authenticated/settings/security"
+      path: "/settings/security"
+      fullPath: "/settings/security"
       preLoaderRoute: typeof AuthenticatedSettingsSecurityRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/sales/$saleId/print': {
-      id: '/_authenticated/sales/$saleId/print'
-      path: '/print'
-      fullPath: '/sales/$saleId/print'
+    "/_authenticated/sales/$saleId/print": {
+      id: "/_authenticated/sales/$saleId/print"
+      path: "/print"
+      fullPath: "/sales/$saleId/print"
       preLoaderRoute: typeof AuthenticatedSalesSaleIdPrintRouteImport
       parentRoute: typeof AuthenticatedSalesSaleIdRoute
     }
@@ -387,9 +343,9 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
+import type { getRouter } from "./router.tsx"
+import type { createStart } from "@tanstack/react-start"
+declare module "@tanstack/react-start" {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>

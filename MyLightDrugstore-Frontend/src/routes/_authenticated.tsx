@@ -16,7 +16,9 @@ function AuthenticatedLayout() {
   return (
     <AppShell
       getServerTime={async () =>
-        (await services.transport.request<{ utc: string }>("/system/time")).data.utc}
+        (await services.transport.request<{ utc: string }>("/system/time")).data
+          .utc
+      }
       onLogout={services.session.logout}
     />
   )

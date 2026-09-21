@@ -10,7 +10,10 @@ export function SalesReportPage({
 }) {
   return (
     <main>
-      <header><p>Operations</p><h1>Sales report</h1></header>
+      <header>
+        <p>Operations</p>
+        <h1>Sales report</h1>
+      </header>
       <SalesReportWidget report={report} onFilter={onFilter} />
     </main>
   )

@@ -8,5 +8,9 @@ export function Button({
   variant?: "primary" | "secondary" | "danger" | "ghost"
   children: ReactNode
 }) {
-  return <button data-variant={variant} {...props}>{children}</button>
+  return (
+    <button data-variant={variant} {...props}>
+      {children}
+    </button>
+  )
 }
