@@ -4,7 +4,7 @@ import { useSession, useSessionStore } from "@/features/auth"
 
 interface NavigationItem {
   label: string
-  to: "/dashboard" | "/catalog" | "/inventory" | "/sales" | "/sales/new" | "/reports/inventory" | "/reports/sales" | "/settings/security" | "/admin/users" | "/backups"
+  to: "/dashboard" | "/catalog" | "/inventory" | "/sales" | "/sales/new" | "/sales/cart" | "/reports/inventory" | "/reports/sales" | "/settings/security" | "/admin/users" | "/backups"
   adminOnly?: boolean
 }
 
@@ -24,6 +24,7 @@ const navigation: NavigationGroup[] = [
     label: "Sales",
     items: [
       { label: "New sale", to: "/sales/new" },
+      { label: "Open cart", to: "/sales/cart" },
       { label: "Sale history", to: "/sales" },
     ],
   },

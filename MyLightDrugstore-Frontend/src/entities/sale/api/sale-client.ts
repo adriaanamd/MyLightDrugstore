@@ -1,5 +1,10 @@
 import type { TransportClient } from "@/shared/api"
-import type { Sale, SaleCreatePayload, SaleListParams } from "../model/types"
+import type {
+  Sale,
+  SaleCreatePayload,
+  SaleItemInput,
+  SaleListParams,
+} from "../model/types"
 
 export function createSaleApi(client: Pick<TransportClient, "request">) {
   return {
@@ -15,6 +20,18 @@ export function createSaleApi(client: Pick<TransportClient, "request">) {
         headers: idempotencyKey
           ? { "Idempotency-Key": idempotencyKey }
           : undefined,
+      })
+    },
+    addItem(saleId: string, payload: SaleItemInput, idempotencyKey: string) {
+      return client.request<Sale>(`/sales/${saleId}/items`, {
+        method: "POST",
+        body: payload,
+        headers: { "Idempotency-Key": idempotencyKey },
+      })
+    },
+    removeItem(saleId: string, saleItemId: string) {
+      return client.request<Sale>(`/sales/${saleId}/items/${saleItemId}`, {
+        method: "DELETE",
       })
     },
     show(id: string) {
