@@ -16,6 +16,7 @@ import { Route as AuthenticatedCatalogRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedInventoryRouteImport } from './routes/_authenticated/inventory'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedReportsInventoryRouteImport } from './routes/_authenticated/reports/inventory'
 import { Route as AuthenticatedReportsSalesRouteImport } from './routes/_authenticated/reports/sales'
 import { Route as AuthenticatedSalesSaleIdRouteImport } from './routes/_authenticated/sales/$saleId'
@@ -55,6 +56,11 @@ const AuthenticatedInventoryRoute = AuthenticatedInventoryRouteImport.update({
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedReportsInventoryRoute =
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/sales': typeof AuthenticatedSalesRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/inventory': typeof AuthenticatedInventoryRoute
   '/sales': typeof AuthenticatedSalesRouteWithChildren
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/inventory': typeof AuthenticatedInventoryRoute
   '/_authenticated/sales': typeof AuthenticatedSalesRouteWithChildren
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/reports/inventory': typeof AuthenticatedReportsInventoryRoute
   '/_authenticated/reports/sales': typeof AuthenticatedReportsSalesRoute
   '/_authenticated/sales/$saleId': typeof AuthenticatedSalesSaleIdRouteWithChildren
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inventory'
     | '/sales'
+    | '/admin/users'
     | '/reports/inventory'
     | '/reports/sales'
     | '/sales/$saleId'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inventory'
     | '/sales'
+    | '/admin/users'
     | '/reports/inventory'
     | '/reports/sales'
     | '/sales/$saleId'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/inventory'
     | '/_authenticated/sales'
+    | '/_authenticated/admin/users'
     | '/_authenticated/reports/inventory'
     | '/_authenticated/reports/sales'
     | '/_authenticated/sales/$saleId'
@@ -238,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: '/sales'
       fullPath: '/sales'
       preLoaderRoute: typeof AuthenticatedSalesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/reports/inventory': {
@@ -317,6 +336,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInventoryRoute: typeof AuthenticatedInventoryRoute
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRouteWithChildren
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedReportsInventoryRoute: typeof AuthenticatedReportsInventoryRoute
   AuthenticatedReportsSalesRoute: typeof AuthenticatedReportsSalesRoute
   AuthenticatedSettingsSecurityRoute: typeof AuthenticatedSettingsSecurityRoute
@@ -327,6 +347,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInventoryRoute: AuthenticatedInventoryRoute,
   AuthenticatedSalesRoute: AuthenticatedSalesRouteWithChildren,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedReportsInventoryRoute: AuthenticatedReportsInventoryRoute,
   AuthenticatedReportsSalesRoute: AuthenticatedReportsSalesRoute,
   AuthenticatedSettingsSecurityRoute: AuthenticatedSettingsSecurityRoute,
