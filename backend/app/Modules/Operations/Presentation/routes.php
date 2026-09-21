@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Modules\Identity\Presentation\RequireAdmin;
 use App\Modules\Operations\Presentation\BackupDownloadController;
 use App\Modules\Operations\Presentation\BackupRequestController;
 use App\Modules\Operations\Presentation\BackupStatusController;
 use App\Modules\Operations\Presentation\ServerTimeController;
-use App\Modules\Users\Presentation\RequireAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/backups', BackupRequestController::class)

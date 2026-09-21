@@ -19,7 +19,7 @@ final class CoreRouteAuthorizationTest extends TestCase
         foreach ($routes as $route) {
             $this->assertContains('auth:web', $route->middleware(), $route->uri());
             $this->assertContains(
-                'App\\Modules\\Users\\Presentation\\RequireAdmin',
+                'App\\Modules\\Identity\\Presentation\\RequireAdmin',
                 $route->middleware(),
                 $route->uri(),
             );
@@ -39,7 +39,7 @@ final class CoreRouteAuthorizationTest extends TestCase
 
             if ($route->methods() === ['POST']) {
                 $this->assertNotContains(
-                    'App\\Modules\\Users\\Presentation\\RequireAdmin',
+                    'App\\Modules\\Identity\\Presentation\\RequireAdmin',
                     $route->middleware(),
                 );
 
@@ -47,7 +47,7 @@ final class CoreRouteAuthorizationTest extends TestCase
             }
 
             $this->assertContains(
-                'App\\Modules\\Users\\Presentation\\RequireAdmin',
+                'App\\Modules\\Identity\\Presentation\\RequireAdmin',
                 $route->middleware(),
             );
         }

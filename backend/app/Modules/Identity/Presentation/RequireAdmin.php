@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Users\Presentation;
+namespace App\Modules\Identity\Presentation;
 
 use App\Modules\Identity\Application\GetAuthenticatedUserAction;
 use Closure;

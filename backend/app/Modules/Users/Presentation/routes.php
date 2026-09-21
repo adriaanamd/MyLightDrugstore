@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Modules\Users\Presentation\RequireAdmin;
+use App\Modules\Identity\Presentation\RequireAdmin;
 use App\Modules\Users\Presentation\UserCreateController;
 use App\Modules\Users\Presentation\UserDetailController;
 use App\Modules\Users\Presentation\UserListController;
