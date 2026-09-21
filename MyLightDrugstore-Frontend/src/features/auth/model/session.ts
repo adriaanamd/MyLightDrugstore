@@ -14,6 +14,8 @@ export function createSessionStore(client: AuthSessionClient) {
       return () => listeners.delete(listener)
     },
     async bootstrap() {
+      if (snapshot.status !== "unknown") return
+
       try {
         const response = await client.me()
         update({ status: "authenticated", user: response.data })

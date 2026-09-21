@@ -1,4 +1,5 @@
 import { createRouter, type RouterHistory } from "@tanstack/react-router"
+import { getAppServices } from "./app/providers/app-services"
 import { routeTree } from "./routeTree.gen"
 
 type AppRouterOptions = {
@@ -8,7 +9,7 @@ type AppRouterOptions = {
 export function getRouter(options: AppRouterOptions = {}) {
   return createRouter({
     routeTree,
-    context: { user: null },
+    context: { session: getAppServices().session },
     scrollRestoration: true,
     ...options,
   })

@@ -1,8 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import type { PropsWithChildren } from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { SessionStoreProvider } from "@/features/auth/model/context"
+import { getAppServices } from "./app-services"
 
 export function AppProviders({ children }: PropsWithChildren) {
+  const services = getAppServices()
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -15,7 +18,15 @@ export function AppProviders({ children }: PropsWithChildren) {
       }),
   )
 
+  useEffect(() => {
+    void services.session.bootstrap()
+  }, [services.session])
+
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <SessionStoreProvider store={services.session}>
+        {children}
+      </SessionStoreProvider>
+    </QueryClientProvider>
   )
 }

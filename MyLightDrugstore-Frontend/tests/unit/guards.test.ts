@@ -4,7 +4,13 @@ import { requireAuthenticated } from "@/app/router/guards"
 
 test("authenticated guard rejects an anonymous route context", () => {
   assert.throws(
-    () => requireAuthenticated({ user: null }),
+    () =>
+      requireAuthenticated({
+        session: {
+          getSnapshot: () => ({ status: "anonymous", user: null }),
+          bootstrap: async () => undefined,
+        },
+      }),
     (error: unknown) => {
       if (!error || typeof error !== "object" || !("options" in error)) {
         return false
@@ -22,6 +28,14 @@ test("authenticated guard rejects an anonymous route context", () => {
 })
 
 test("authenticated guard returns the current user", () => {
-  const user = { id: 7, name: "Staff" }
-  assert.deepEqual(requireAuthenticated({ user }), user)
+  const user = { username: "staff", fullName: "Staff User" }
+  assert.deepEqual(
+    requireAuthenticated({
+      session: {
+        getSnapshot: () => ({ status: "authenticated", user }),
+        bootstrap: async () => undefined,
+      },
+    }),
+    user,
+  )
 })

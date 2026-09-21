@@ -26,4 +26,7 @@ export type AuthSessionClient = {
 export type SessionStore = {
   getSnapshot(): SessionSnapshot
   subscribe(listener: () => void): () => void
+  bootstrap(): Promise<void>
+  login(credentials: LoginCredentials): Promise<AuthUserProfile>
+  logout(): Promise<void>
 }

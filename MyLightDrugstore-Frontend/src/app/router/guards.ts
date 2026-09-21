@@ -1,18 +1,15 @@
 import { redirect } from "@tanstack/react-router"
-
-export type AuthenticatedUser = {
-  id: number
-  name: string
-}
+import type { SessionStore } from "@/features/auth/model/types"
 
 export type AuthRouteContext = {
-  user: AuthenticatedUser | null
+  session: Pick<SessionStore, "getSnapshot" | "bootstrap">
 }
 
-export function requireAuthenticated({ user }: AuthRouteContext) {
-  if (!user) {
+export function requireAuthenticated({ session }: AuthRouteContext) {
+  const snapshot = session.getSnapshot()
+  if (snapshot.status !== "authenticated" || !snapshot.user) {
     throw redirect({ href: "/login" })
   }
 
-  return user
+  return snapshot.user
 }
