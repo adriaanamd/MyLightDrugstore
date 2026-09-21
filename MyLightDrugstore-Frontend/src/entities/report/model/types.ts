@@ -18,7 +18,13 @@ export type InventoryReportRow = {
 
 export type InventoryReportResponse = {
   data: InventoryReportRow[]
-  meta?: { total?: number page?: number perPage?: number }
+  meta?: InventoryReportMeta
+}
+
+export interface InventoryReportMeta {
+  total?: number
+  page?: number
+  perPage?: number
 }
 
 export type InventoryReport = {

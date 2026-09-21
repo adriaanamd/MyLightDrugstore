@@ -22,7 +22,12 @@ export function PageHeader({
   )
 }
 
-export function StatCard({ label, value }: { label: string value: ReactNode }) {
+interface StatCardProps {
+  label: string
+  value: ReactNode
+}
+
+export function StatCard({ label, value }: StatCardProps) {
   return (
     <Card>
       <p>{label}</p>

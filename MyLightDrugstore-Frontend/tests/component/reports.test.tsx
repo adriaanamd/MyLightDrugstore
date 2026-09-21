@@ -9,6 +9,11 @@ import {
 import { InventoryReportPage } from "@/pages/reports/inventory-report-page"
 import { SalesReportPage } from "@/pages/reports/sales-report-page"
 
+interface ReportFilterCapture {
+  from?: string
+  to?: string
+}
+
 describe("reports", () => {
   it("maps Laravel report envelopes into typed report data", () => {
     expect(
@@ -36,7 +41,7 @@ describe("reports", () => {
 
   it("submits date filters from both report pages", async () => {
     const user = userEvent.setup()
-    const filters: Array<{ from?: string to?: string }> = []
+    const filters: ReportFilterCapture[] = []
 
     render(
       <>

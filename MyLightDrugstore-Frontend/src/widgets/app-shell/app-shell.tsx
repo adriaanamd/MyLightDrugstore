@@ -2,13 +2,18 @@ import { Link, Outlet, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { useSession, useSessionStore } from "@/features/auth"
 
-type NavigationItem = {
+interface NavigationItem {
   label: string
   to: "/dashboard" | "/catalog" | "/inventory" | "/sales" | "/sales/new" | "/reports/inventory" | "/reports/sales" | "/settings/security" | "/admin/users" | "/backups"
   adminOnly?: boolean
 }
 
-const navigation: Array<{ label: string items: NavigationItem[] }> = [
+interface NavigationGroup {
+  label: string
+  items: NavigationItem[]
+}
+
+const navigation: NavigationGroup[] = [
   { label: "Overview", items: [{ label: "Dashboard", to: "/dashboard" }] },
   { label: "Catalog", items: [{ label: "Medicines", to: "/catalog" }] },
   {
