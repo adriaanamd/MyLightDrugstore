@@ -1,7 +1,6 @@
 import { Link, Outlet, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { useSession, useSessionStore } from "@/features/auth"
-import { getAppServices } from "@/app/providers/app-services"
 
 type NavigationItem = {
   label: string
@@ -47,7 +46,13 @@ const navigation: Array<{ label: string; items: NavigationItem[] }> = [
   },
 ]
 
-export function AppShell() {
+export function AppShell({
+  getServerTime,
+  onLogout,
+}: {
+  getServerTime: () => Promise<string>
+  onLogout: () => Promise<void>
+}) {
   const sessionStore = useSessionStore()
   const session = useSession(sessionStore)
   const navigate = useNavigate()
@@ -58,10 +63,8 @@ export function AppShell() {
     let active = true
     const loadTime = async () => {
       try {
-        const response = await getAppServices().transport.request<{ utc: string }>(
-          "/system/time",
-        )
-        if (active) setServerTime(response.data.utc)
+        const utc = await getServerTime()
+        if (active) setServerTime(utc)
       } catch {
         if (active) setServerTime(undefined)
       }
@@ -75,7 +78,7 @@ export function AppShell() {
   }, [])
 
   const logout = async () => {
-    await sessionStore.logout()
+    await onLogout()
     await navigate({ to: "/login" })
   }
 

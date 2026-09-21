@@ -1,5 +1,4 @@
-import type { ChangePasswordPayload } from "@/features/auth"
-import type { AuthSessionClient } from "@/features/auth/model/types"
+import type { AuthSessionClient, ChangePasswordPayload } from "@/features/auth"
 
 export function createPasswordChange(client: AuthSessionClient) {
   return {

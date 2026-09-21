@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { requireAuthenticated } from "@/app/router/guards"
+import { getAppServices } from "@/app/providers/app-services"
 import { AppShell } from "@/widgets/app-shell"
 
 export const Route = createFileRoute("/_authenticated")({
@@ -11,5 +12,12 @@ export const Route = createFileRoute("/_authenticated")({
 })
 
 function AuthenticatedLayout() {
-  return <AppShell />
+  const services = getAppServices()
+  return (
+    <AppShell
+      getServerTime={async () =>
+        (await services.transport.request<{ utc: string }>("/system/time")).data.utc}
+      onLogout={services.session.logout}
+    />
+  )
 }
