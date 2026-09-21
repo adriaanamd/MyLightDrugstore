@@ -1,5 +1,6 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { requireAuthenticated } from "@/app/router/guards"
+import { AppShell } from "@/widgets/app-shell"
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ context }) => {
@@ -10,5 +11,5 @@ export const Route = createFileRoute("/_authenticated")({
 })
 
 function AuthenticatedLayout() {
-  return <Outlet />
+  return <AppShell />
 }

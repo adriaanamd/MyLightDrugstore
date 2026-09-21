@@ -1,8 +1,11 @@
 import type { TransportClient, TransportResponse } from "@/shared/api"
 
 export type AuthUserProfile = {
+  id?: number
   username: string
   fullName: string
+  role?: "admin" | "staff" | string
+  active?: boolean
 }
 
 export type LoginCredentials = {
