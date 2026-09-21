@@ -73,6 +73,23 @@ final class CoreRouteAuthorizationTest extends TestCase
         $this->assertContains('auth:web', $route->middleware());
     }
 
+    public function test_every_non_public_v1_route_requires_an_authenticated_session(): void
+    {
+        $publicRoutes = [
+            'api/v1/transport/public-key',
+            'api/v1/auth/csrf',
+            'api/v1/auth/login',
+        ];
+
+        foreach (RouteFacade::getRoutes()->getRoutes() as $route) {
+            if (! str_starts_with($route->uri(), 'api/v1/') || in_array($route->uri(), $publicRoutes, true)) {
+                continue;
+            }
+
+            $this->assertContains('auth:web', $route->middleware(), $route->uri());
+        }
+    }
+
     /** @return list<Route> */
     private function routesStartingWith(string $prefix): array
     {
