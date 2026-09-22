@@ -1,9 +1,5 @@
 import { encodeBase64Url } from "./base64url"
-import {
-  generateAes256Key,
-  importRsaOaepPublicKey,
-  wrapAesKey,
-} from "./crypto"
+import { generateAes256Key, importRsaOaepPublicKey, wrapAesKey } from "./crypto"
 import { TransportRequestError } from "./errors"
 import type { TransportPublicKey } from "./types"
 
@@ -47,11 +43,14 @@ export function createTransportSession({
   }
 
   async function establishSession(): Promise<TransportSession> {
-    const response = await fetchImpl(resolveUrl(baseUrl, "/transport/public-key"), {
-      method: "GET",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    })
+    const response = await fetchImpl(
+      resolveUrl(baseUrl, "/transport/public-key"),
+      {
+        method: "GET",
+        credentials: "include",
+        headers: { Accept: "application/json" },
+      },
+    )
 
     if (!response.ok) {
       throw new TransportRequestError(
@@ -87,7 +86,9 @@ function resolveUrl(baseUrl: string, path: string): string {
   return `${baseUrl.replace(/\/$/, "")}/${path.replace(/^\/+/, "")}`
 }
 
-function isPublicKeyPayload(value: unknown): value is {
+function isPublicKeyPayload(
+  value: unknown,
+): value is {
   data: TransportPublicKey
 } {
   if (!isRecord(value) || !isRecord(value.data)) {

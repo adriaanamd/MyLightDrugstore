@@ -9,7 +9,7 @@ test("frontend exposes the required quality scripts", async () => {
   const scripts = packageJson.scripts ?? {}
 
   assert.equal(scripts.typecheck, "tsc --noEmit")
-  assert.equal(scripts["format:check"], "oxfmt --check .")
+  assert.equal(scripts["format:check"], "node scripts/check-format.mjs")
   assert.equal(scripts["test:unit"], "vitest run")
   assert.equal(
     scripts["test:architecture"],

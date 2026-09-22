@@ -1,8 +1,5 @@
 import { encodeBase64Url } from "./base64url"
-import type {
-  TransportRequestPayload,
-  TransportResponsePayload,
-} from "./types"
+import type { TransportRequestPayload, TransportResponsePayload } from "./types"
 
 const MAX_TRANSPORT_REQUEST_BYTES = 1_400_000
 

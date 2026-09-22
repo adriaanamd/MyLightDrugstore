@@ -25,7 +25,10 @@ async function createPublicKeyPem(): Promise<string> {
     binary += String.fromCharCode(byte)
   }
 
-  const lines = btoa(binary).match(/.{1,64}/g)?.join("\n") ?? ""
+  const lines =
+    btoa(binary)
+      .match(/.{1,64}/g)
+      ?.join("\n") ?? ""
   return `-----BEGIN PUBLIC KEY-----\n${lines}\n-----END PUBLIC KEY-----`
 }
 

@@ -21,9 +21,7 @@ export function isSafeMethod(method?: string): boolean {
   return ["GET", "HEAD", "OPTIONS"].includes(normalizedMethod)
 }
 
-export async function ensureCsrfToken(
-  fetchCsrf: CsrfFetcher,
-): Promise<string> {
+export async function ensureCsrfToken(fetchCsrf: CsrfFetcher): Promise<string> {
   if (csrfToken) {
     return csrfToken
   }

@@ -58,13 +58,7 @@ export function decodeTransportEnvelope(payload: unknown): TransportEnvelope {
     throw invalidEnvelope()
   }
 
-  const expectedFields = [
-    "version",
-    "algorithm",
-    "keyId",
-    "iv",
-    "ciphertext",
-  ]
+  const expectedFields = ["version", "algorithm", "keyId", "iv", "ciphertext"]
   const actualFields = Object.keys(payload)
 
   if (

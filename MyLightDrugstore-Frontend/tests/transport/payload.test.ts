@@ -10,10 +10,9 @@ import {
 describe("transport logical payloads", () => {
   it("serializes JSON as a typed request descriptor", () => {
     const bytes = serializeJsonPayload({ medicineId: 42, quantity: 2 })
-    const descriptor = JSON.parse(new TextDecoder().decode(bytes)) as Record<
-      string,
-      unknown
-    >
+    const descriptor = JSON.parse(
+      new TextDecoder().decode(bytes),
+    ) as Record<string, unknown>
 
     expect(descriptor).toEqual({
       kind: "json",
@@ -71,7 +70,10 @@ describe("transport logical payloads", () => {
 
   it("rejects request payloads larger than the transport limit", () => {
     expect(() =>
-      serializeBinaryPayload(new Uint8Array(1_400_001), "application/octet-stream"),
+      serializeBinaryPayload(
+        new Uint8Array(1_400_001),
+        "application/octet-stream",
+      ),
     ).toThrow("too large")
   })
 })

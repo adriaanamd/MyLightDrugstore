@@ -23,12 +23,10 @@ describe("transport base64url primitives", () => {
     expect(decodeBase64Url(encoded)).toEqual(input)
   })
 
-  it.each(["A", "AA=", "AA+", "AA/", "AA=="]) (
+  it.each(["A", "AA=", "AA+", "AA/", "AA=="])(
     "rejects non-canonical value %s",
     (value) => {
-      expect(() => decodeBase64Url(value)).toThrow(
-        "canonical base64url",
-      )
+      expect(() => decodeBase64Url(value)).toThrow("canonical base64url")
     },
   )
 })

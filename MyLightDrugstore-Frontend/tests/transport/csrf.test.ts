@@ -40,9 +40,7 @@ describe("transport csrf state", () => {
   })
 
   it("rejects blank bootstrap tokens and permits explicit clearing", async () => {
-    await expect(ensureCsrfToken(async () => " ")).rejects.toThrow(
-      "CSRF token",
-    )
+    await expect(ensureCsrfToken(async () => " ")).rejects.toThrow("CSRF token")
     setCsrfToken("token")
     expect(getCsrfToken()).toBe("token")
     clearCsrfToken()

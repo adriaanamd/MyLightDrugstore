@@ -9,8 +9,9 @@
     "preview": "vite preview",
     "format": "oxfmt",
     "typecheck": "tsc --noEmit",
-    "format:check": "oxfmt --check .",
+    "format:check": "node scripts/check-format.mjs",
     "test:unit": "vitest run",
+    "test:smoke": "playwright test tests/e2e/smoke.spec.ts",
     "test:architecture": "node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce && node scripts/check-code-quality.mjs --enforce",
     "test": "pnpm run test:unit && pnpm run test:architecture && pnpm run typecheck && pnpm run build"
   },
@@ -22,6 +23,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.55.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
