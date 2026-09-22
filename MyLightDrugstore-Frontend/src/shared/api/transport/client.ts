@@ -6,7 +6,11 @@ import {
   wrapAesKey,
 } from "./crypto"
 
-import { decodeTransportEnvelope, encodeTransportEnvelope } from "./envelope"
+import {
+  buildAdditionalData,
+  decodeTransportEnvelope,
+  encodeTransportEnvelope,
+} from "./envelope"
 
 import { encodeBase64Url } from "./base64url"
 
@@ -86,6 +90,10 @@ export function createTransportClient({
       const method = (requestInit.method ?? "GET").toUpperCase()
 
       const url = resolveUrl(baseUrl, path)
+      const requestTarget = new URL(url, "https://transport.invalid").pathname
+      const additionalData = new TextEncoder().encode(
+        buildAdditionalData(method, requestTarget),
+      )
 
       const session = await getSession()
 
@@ -119,9 +127,7 @@ export function createTransportClient({
 
           new TextEncoder().encode(descriptor),
 
-          method,
-
-          new URL(url, "https://transport.invalid").pathname,
+          additionalData,
         )
 
         headers.set("Content-Type", "application/json")
@@ -178,9 +184,7 @@ export function createTransportClient({
 
         wireEnvelope,
 
-        method,
-
-        new URL(url, "https://transport.invalid").pathname,
+        additionalData,
       )
 
       const descriptor = parseResponseDescriptor(plaintext)
@@ -248,7 +252,7 @@ export function createTransportClient({
 
     const publicKey = await importRsaOaepPublicKey(payload.data.publicKey)
 
-    const { key: aesKey, rawKey } = await generateAes256Key()
+    const { aesKey, rawKey } = await generateAes256Key()
 
     const wrappedKey = encodeBase64Url(await wrapAesKey(publicKey, rawKey))
 
