@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-router"
 import { useState } from "react"
 import type { ReactNode } from "react"
-import { useSession } from "../../../shared/SessionContext"
+import { useAuthSession } from "@/features/auth"
 
 import { getNavigationForRole } from "../model/navigation"
 import { useServerClock } from "../model/use-server-clock"
@@ -186,7 +186,7 @@ const navGroups = [
 ]
 
 export default function AppShell({ children }: { children?: React.ReactNode }) {
-  const { user, logout } = useSession()
+  const { user, logout } = useAuthSession()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 

@@ -1,6 +1,7 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router"
 import { Navigate } from "@tanstack/react-router"
-import { useSession } from "@/shared/SessionContext"
+import { useAuthSession } from "@/features/auth"
+import { Spinner } from "@/shared/ui"
 import AppShell from "@/widgets/AppShell"
 import LoginPage from "@/pages/login/login-page"
 import DashboardPage from "@/pages/dashboard/dashboard-page"
@@ -25,8 +26,14 @@ function Surface() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const { user } = useSession()
+  const { user, status } = useAuthSession()
   if (pathname === "/login") return <LoginPage />
+  if (status === "loading")
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    )
   if (!user) return <Navigate to="/login" replace />
   if (pathname === "/sales/print" || pathname.startsWith("/sales/print/"))
     return <SalesPrintPage />

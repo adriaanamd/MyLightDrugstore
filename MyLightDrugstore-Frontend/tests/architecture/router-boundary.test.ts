@@ -19,4 +19,15 @@ describe("router architecture", () => {
     expect(routeSource).toContain("@tanstack/react-router")
     expect(routeSource).not.toContain("router-compat")
   })
+
+  it("gates protected content on the feature auth session", () => {
+    const routeSource = readFileSync(
+      resolve(process.cwd(), "src/routes/$.tsx"),
+      "utf8",
+    )
+
+    expect(routeSource).toContain("useAuthSession")
+    expect(routeSource).toContain('status === "loading"')
+    expect(routeSource).toContain("if (!user)")
+  })
 })
