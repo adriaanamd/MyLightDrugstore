@@ -13,7 +13,7 @@ test("frontend exposes the required quality scripts", async () => {
   assert.equal(scripts["test:unit"], "vitest run")
   assert.equal(
     scripts["test:architecture"],
-    "node scripts/check-fsd-boundaries.mjs --enforce",
+    "node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce",
   )
   assert.equal(
     scripts.test,

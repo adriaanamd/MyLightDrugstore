@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "format:check": "oxfmt --check .",
     "test:unit": "vitest run",
-    "test:architecture": "node scripts/check-fsd-boundaries.mjs --enforce",
+    "test:architecture": "node scripts/check-fsd-boundaries.mjs --enforce && node scripts/check-source-size.mjs --enforce",
     "test": "pnpm run test:unit && pnpm run test:architecture && pnpm run typecheck && pnpm run build"
   },
   "dependencies": {
