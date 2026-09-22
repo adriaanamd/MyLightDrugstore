@@ -20,26 +20,26 @@ export default function BackupsPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [reqLoading, setReqLoading] = useState(false);
 
-  const load = () => {
+  const load = async () => {
     try {
-      setJobs(mockApi.listBackups());
+      setJobs(await mockApi.listBackups());
     } catch { /* ignore */ }
     setLoading(false);
   };
 
   useEffect(() => {
-    load();
-    const id = setInterval(load, 3000);
+    void load();
+    const id = setInterval(() => { void load(); }, 3000);
     return () => clearInterval(id);
   }, []);
 
-  const handleRequest = () => {
+  const handleRequest = async () => {
     setReqLoading(true);
     try {
-      const job = mockApi.requestBackup();
+      const job = await mockApi.requestBackup();
       showToast(`Backup job ${job.id} queued.`);
       setConfirmOpen(false);
-      load();
+      await load();
     } catch (e) {
       if (e instanceof MockApiError) showToast(e.apiError.message, 'error');
     } finally {
