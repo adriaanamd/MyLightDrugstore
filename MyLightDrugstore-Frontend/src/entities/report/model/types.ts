@@ -1,43 +1,45 @@
+import type { PageMeta } from "@/entities/shared/model/page"
+
 export type ReportFilters = {
   from?: string
 
   to?: string
 
   status?: string
-}
-
-export type InventoryReportRow = {
-  medicineId: string
-
-  genericName?: string
-
-  brandName?: string
-
-  dosageForm?: string
-
-  strength?: string
-
-  unitPrice?: number | string
-
-  stockOnHand: number
 
   lowStock?: boolean
 
-  earliestExpiry?: string | null
+  expiresBefore?: string
+
+  page?: number
+
+  perPage?: number
+}
+
+export type InventoryReportRow = {
+  medicineId: number
+
+  genericName: string
+
+  brandName: string | null
+
+  dosageForm: string
+
+  strength: string | null
+
+  unitPrice: string
+
+  stockOnHand: number
+
+  lowStock: boolean
+
+  earliestExpiry: string | null
 }
 
 export type InventoryReportResponse = {
   data: InventoryReportRow[]
 
-  meta?: InventoryReportMeta
-}
-
-export interface InventoryReportMeta {
-  total?: number
-
-  page?: number
-
-  perPage?: number
+  meta: PageMeta
 }
 
 export type InventoryReport = {
@@ -47,9 +49,9 @@ export type InventoryReport = {
 }
 
 export type SalesReport = {
-  from?: string | null
+  from: string | null
 
-  to?: string | null
+  to: string | null
 
   saleCount: number
 
@@ -62,6 +64,8 @@ export type SalesReport = {
   cancelledSaleCount: number
 }
 
-export type SalesReportResponse = { data: SalesReport }
+export type SalesReportResponse = {
+  data: SalesReport
+}
 
 export type ReportResult = InventoryReportResponse | SalesReportResponse

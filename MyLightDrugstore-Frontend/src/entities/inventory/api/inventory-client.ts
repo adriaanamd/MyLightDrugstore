@@ -44,7 +44,7 @@ export function createInventoryApi(client: Pick<TransportClient, "request">) {
 function withQuery(path: string, params: InventoryListParams): string {
   const query = new URLSearchParams()
 
-  if (params.medicineId) query.set("medicineId", params.medicineId)
+  if (params.medicineId) query.set("medicineId", String(params.medicineId))
 
   const encoded = query.toString()
 

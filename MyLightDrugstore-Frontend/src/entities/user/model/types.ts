@@ -1,21 +1,43 @@
+import type { Page } from "@/entities/shared/model/page"
+
+export type UserId = number
+
+export type UserRole = "admin" | "staff"
+
 export type User = {
-  id: number
+  id: UserId
 
-  name: string
+  username: string
 
-  email: string
+  fullName: string
 
-  role?: string
+  role: UserRole
 
-  isActive?: boolean
+  active: boolean
+
+  createdAt: string
+
+  updatedAt: string | null
 }
 
-export type UserWritePayload = {
-  name?: string
+export type UserCreatePayload = {
+  username: string
 
-  email?: string
+  fullName: string
 
-  role?: string
+  password: string
 
-  isActive?: boolean
+  role: UserRole
 }
+
+export type UserUpdatePayload = {
+  fullName?: string
+
+  role?: UserRole
+
+  active?: boolean
+}
+
+export type UserWritePayload = UserUpdatePayload
+
+export type UserPage = Page<User>
