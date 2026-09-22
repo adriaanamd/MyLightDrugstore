@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { Navigate } from "@tanstack/react-router"
 
 import { useAuthSession } from "@/features/auth"
-import AppShell from "@/widgets/AppShell"
+import { AppShell } from "@/widgets/app-shell"
 import { Spinner } from "@/shared/ui"
 
 type AuthenticatedPageProps = {
