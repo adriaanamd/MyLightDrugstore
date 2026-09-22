@@ -1,4 +1,4 @@
-import type { MedicineId } from "@/entities/medicine/model/types"
+import type { MedicineId } from "@/entities/medicine"
 import type { Page } from "@/entities/shared/model/page"
 
 export type SaleState = "open" | "completed" | "cancelled"

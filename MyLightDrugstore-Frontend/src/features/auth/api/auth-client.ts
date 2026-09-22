@@ -3,7 +3,7 @@ import { TransportRequestError } from "@/shared/api"
 import { setCsrfToken } from "@/shared/api/transport/csrf"
 import { unwrapData } from "@/shared/api/query"
 
-import type { UserRole } from "@/entities/user/model/types"
+import type { UserRole } from "@/entities/user"
 
 export type AuthUserProfile = {
   id: number
