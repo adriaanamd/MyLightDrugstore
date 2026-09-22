@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises"
 import { extname, join, relative, sep } from "node:path"
 
 const extensions = new Set([".ts", ".tsx", ".js", ".jsx"])
+// Existing UI composites remain intact to preserve the approved presentation.
 const defaultLimit = 520
 
 export async function findSourceSizeViolations(
