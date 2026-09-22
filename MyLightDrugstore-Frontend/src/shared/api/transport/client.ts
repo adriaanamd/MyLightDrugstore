@@ -1,263 +1,252 @@
-import {
-  decryptAesGcm,
-  encryptAesGcm,
-  generateAes256Key,
-  importRsaOaepPublicKey,
-  wrapAesKey,
-} from "./crypto"
-
+import { ensureCsrfToken, isSafeMethod, clearCsrfToken } from "./csrf"
+import { decryptAesGcm, encryptAesGcm } from "./crypto"
 import {
   buildAdditionalData,
   decodeTransportEnvelope,
   encodeTransportEnvelope,
 } from "./envelope"
-
-import { encodeBase64Url } from "./base64url"
-
 import { TransportRequestError } from "./errors"
+import {
+  decodeLogicalResponseBody,
+  parseLogicalResponsePayload,
+  serializeBinaryPayload,
+  serializeJsonPayload,
+} from "./payload"
+import { createTransportSession } from "./session"
 
 export type TransportRequestInit = Omit<RequestInit, "body"> & {
   body?: unknown
   skipCsrf?: boolean
 }
 
-type PublicKeyPayload = {
-  data: {
-    version: 1
-
-    algorithm: "RSA-OAEP-256"
-
-    transportAlgorithm: "A256GCM"
-
-    keyId: string
-
-    publicKey: string
-  }
-}
-
-type ResponseDescriptor = {
-  contentType: string
-
-  headers: Record<string, string>
-
-  body: string
-
-  bodyEncoding: "utf8" | "base64"
-}
-
 export type TransportResponse<T,> = {
   data: T
-
   status: number
-
   headers: Headers
-
   contentType?: string
 }
 
 export type TransportClient = {
   request<T>(
     path: string,
-
     init?: TransportRequestInit,
   ): Promise<TransportResponse<T>>
+  clear(): void
 }
 
 export type TransportClientOptions = {
   baseUrl: string
-
   fetchImpl?: typeof fetch
-}
-
-type TransportSession = {
-  keyId: string
-
-  aesKey: CryptoKey
-
-  wrappedKey: string
 }
 
 export function createTransportClient({
   baseUrl,
-
   fetchImpl = fetch,
 }: TransportClientOptions): TransportClient {
-  let sessionPromise: Promise<TransportSession> | undefined
+  const session = createTransportSession({ baseUrl, fetchImpl })
 
   return {
-    async request<T,>(path: string, init: TransportRequestInit = {}) {
-      const { skipCsrf = false, ...requestInit } = init
-      const method = (requestInit.method ?? "GET").toUpperCase()
-
-      const url = resolveUrl(baseUrl, path)
-      const requestTarget = new URL(url, "https://transport.invalid").pathname
-      const additionalData = new TextEncoder().encode(
-        buildAdditionalData(method, requestTarget),
-      )
-
-      const session = await getSession()
-
-      const headers = new Headers(requestInit.headers)
-
-      headers.set("Accept", "application/json")
-
-      headers.set("X-Transport-Key", `${session.keyId}.${session.wrappedKey}`)
-
-      if (!skipCsrf && !isSafeMethod(method)) {
-        const csrfResponse = await this.request<{ data: { csrfToken: string } }>(
-          "/auth/csrf",
-          { method: "GET", skipCsrf: true },
-        )
-        headers.set("X-CSRF-TOKEN", csrfResponse.data.data.csrfToken)
-      }
-
-      let body: string | undefined
-
-      if (init.body !== undefined) {
-        const descriptor = JSON.stringify({
-          kind: "json",
-
-          contentType: "application/json",
-
-          value: JSON.stringify(init.body),
-        })
-
-        const encrypted = await encryptAesGcm(
-          session.aesKey,
-
-          new TextEncoder().encode(descriptor),
-
-          additionalData,
-        )
-
-        headers.set("Content-Type", "application/json")
-
-        body = JSON.stringify(
-          encodeTransportEnvelope({
-            version: 1,
-
-            algorithm: "A256GCM",
-
-            keyId: session.keyId,
-
-            ...encrypted,
-          }),
-        )
-      }
-
-      const response = await fetchImpl(url, {
-        ...requestInit,
-
-        method,
-
-        headers,
-
-        body,
-
-        credentials: requestInit.credentials ?? "include",
-      })
-
-      if (response.status === 204 || response.status === 304) {
-        return {
-          data: undefined as T,
-
-          status: response.status,
-
-          headers: response.headers,
-        }
-      }
-
-      const wireEnvelope = decodeTransportEnvelope(await response.json())
-
-      if (wireEnvelope.keyId !== session.keyId) {
-        throw new TransportRequestError(
-          "The transport response key does not match the session.",
-
-          response.status,
-
-          "transport_error",
-        )
-      }
-
-      const plaintext = await decryptAesGcm(
-        session.aesKey,
-
-        wireEnvelope,
-
-        additionalData,
-      )
-
-      const descriptor = parseResponseDescriptor(plaintext)
-
-      const logicalHeaders = new Headers(response.headers)
-
-      for (const [name, value] of Object.entries(descriptor.headers)) {
-        logicalHeaders.set(name, value)
-      }
-
-      const data = decodeResponseBody(descriptor)
-
-      if (!response.ok) {
-        throw createResponseError(response, logicalHeaders, data)
-      }
-
-      return {
-        data: data as T,
-
-        status: response.status,
-
-        headers: logicalHeaders,
-
-        contentType: descriptor.contentType,
-      }
+    request,
+    clear(): void {
+      session.clear()
+      clearCsrfToken()
     },
   }
 
-  async function getSession(): Promise<TransportSession> {
-    sessionPromise ??= establishSession()
+  async function request<T>(
+    path: string,
+    init: TransportRequestInit = {},
+  ): Promise<TransportResponse<T>> {
+    const { skipCsrf = false, body: logicalBody, ...requestInit } = init
+    const method = (requestInit.method ?? "GET").toUpperCase()
+    const url = resolveUrl(baseUrl, path)
+    const requestTarget = new URL(url, "https://transport.invalid").pathname
+    const additionalData = new TextEncoder().encode(
+      buildAdditionalData(method, requestTarget),
+    )
+    const transportSession = await session.get()
+    const headers = new Headers(requestInit.headers)
 
-    try {
-      return await sessionPromise
-    } catch (error) {
-      sessionPromise = undefined
-
-      throw error
-    }
-  }
-
-  async function establishSession(): Promise<TransportSession> {
-    const response = await fetchImpl(
-      resolveUrl(baseUrl, "/transport/public-key"),
-
-      {
-        method: "GET",
-
-        credentials: "include",
-
-        headers: { Accept: "application/json" },
-      },
+    headers.set("Accept", "application/json")
+    headers.set(
+      "X-Transport-Key",
+      `${transportSession.keyId}.${transportSession.wrappedKey}`,
     )
 
-    if (!response.ok) {
+    if (!skipCsrf && !isSafeMethod(method)) {
+      const token = await ensureCsrfToken(async () => {
+        const csrfResponse = await request<{ data: { csrfToken: string } }>(
+          "/auth/csrf",
+          { method: "GET", skipCsrf: true },
+        )
+        return readCsrfToken(csrfResponse.data)
+      })
+      headers.set("X-CSRF-TOKEN", token)
+    }
+
+    const encryptedBody =
+      logicalBody === undefined
+        ? undefined
+        : await encryptRequestBody(
+            logicalBody,
+            headers,
+            transportSession.aesKey,
+            additionalData,
+            transportSession.keyId,
+          )
+
+    if (encryptedBody !== undefined) {
+      headers.set("Content-Type", "application/json")
+    }
+
+    const response = await fetchImpl(url, {
+      ...requestInit,
+      method,
+      headers,
+      body: encryptedBody,
+      credentials: requestInit.credentials ?? "include",
+    })
+
+    if (response.status === 204 || response.status === 304) {
+      return {
+        data: undefined as T,
+        status: response.status,
+        headers: response.headers,
+      }
+    }
+
+    const wireEnvelope = decodeTransportEnvelope(
+      (await response.json()) as unknown,
+    )
+
+    if (wireEnvelope.keyId !== transportSession.keyId) {
       throw new TransportRequestError(
-        "The transport public key could not be loaded.",
-
+        "The transport response key does not match the session.",
         response.status,
-
-        "transport_key_unavailable",
+        "transport_error",
       )
     }
 
-    const payload = (await response.json()) as PublicKeyPayload
+    const plaintext = await decryptAesGcm(
+      transportSession.aesKey,
+      wireEnvelope,
+      additionalData,
+    )
+    const responsePayload = parseLogicalResponsePayload(
+      parseJson(plaintext, "The transport response descriptor is invalid."),
+    )
+    const logicalHeaders = new Headers(response.headers)
 
-    const publicKey = await importRsaOaepPublicKey(payload.data.publicKey)
+    for (const [name, value] of Object.entries(responsePayload.headers)) {
+      logicalHeaders.set(name, value)
+    }
 
-    const { aesKey, rawKey } = await generateAes256Key()
+    const data = decodeLogicalResponseBody(responsePayload)
 
-    const wrappedKey = encodeBase64Url(await wrapAesKey(publicKey, rawKey))
+    if (!response.ok) {
+      throw createResponseError(response.status, logicalHeaders, data)
+    }
 
-    return { keyId: payload.data.keyId, aesKey, wrappedKey }
+    return {
+      data: data as T,
+      status: response.status,
+      headers: logicalHeaders,
+      contentType: responsePayload.contentType,
+    }
   }
+}
+
+async function encryptRequestBody(
+  logicalBody: unknown,
+  headers: Headers,
+  key: CryptoKey,
+  additionalData: Uint8Array,
+  keyId: string,
+): Promise<string> {
+  const contentType = headers.get("Content-Type") ?? "application/json"
+  const descriptor =
+    logicalBody instanceof Uint8Array
+      ? new TextEncoder().encode(
+          JSON.stringify(serializeBinaryPayload(logicalBody, contentType)),
+        )
+      : serializeJsonPayload(logicalBody)
+  const encrypted = await encryptAesGcm(key, descriptor, additionalData)
+
+  return JSON.stringify(
+    encodeTransportEnvelope({
+      version: 1,
+      algorithm: "A256GCM",
+      keyId,
+      ...encrypted,
+    }),
+  )
+}
+
+function parseJson(bytes: Uint8Array, message: string): unknown {
+  try {
+    return JSON.parse(new TextDecoder().decode(bytes)) as unknown
+  } catch {
+    throw new TransportRequestError(message, 0, "transport_error")
+  }
+}
+
+function readCsrfToken(value: unknown): string {
+  if (
+    !isRecord(value) ||
+    !isRecord(value.data) ||
+    typeof value.data.csrfToken !== "string"
+  ) {
+    throw new TransportRequestError(
+      "The CSRF token response is invalid.",
+      0,
+      "transport_error",
+    )
+  }
+
+  const token = value.data.csrfToken.trim()
+
+  if (!token) {
+    throw new TransportRequestError(
+      "The CSRF token response is invalid.",
+      0,
+      "transport_error",
+    )
+  }
+
+  return token
+}
+
+function createResponseError(
+  status: number,
+  headers: Headers,
+  data: unknown,
+): TransportRequestError {
+  const apiError = readApiError(data)
+
+  return new TransportRequestError(
+    apiError?.message ?? `The API request failed with status ${status}.`,
+    status,
+    apiError?.code ?? "api_error",
+    headers.get("x-request-id") ?? undefined,
+    data,
+  )
+}
+
+type ApiErrorPayload = {
+  code?: string
+  message?: string
+}
+
+function readApiError(value: unknown): ApiErrorPayload | undefined {
+  if (!isRecord(value) || !isRecord(value.error)) {
+    return undefined
+  }
+
+  const code =
+    typeof value.error.code === "string" ? value.error.code : undefined
+  const message =
+    typeof value.error.message === "string" ? value.error.message : undefined
+  return { code, message }
 }
 
 function resolveUrl(baseUrl: string, path: string): string {
@@ -268,118 +257,6 @@ function resolveUrl(baseUrl: string, path: string): string {
   return `${baseUrl.replace(/\/$/, "")}/${path.replace(/^\/+/, "")}`
 }
 
-function isSafeMethod(method: string): boolean {
-  return method === "GET" || method === "HEAD" || method === "OPTIONS"
-}
-
-function parseResponseDescriptor(bytes: Uint8Array): ResponseDescriptor {
-  let parsed: unknown
-
-  try {
-    parsed = JSON.parse(new TextDecoder().decode(bytes))
-  } catch {
-    throw new TransportRequestError(
-      "The transport response descriptor is invalid.",
-
-      0,
-
-      "transport_error",
-    )
-  }
-
-  if (!isResponseDescriptor(parsed)) {
-    throw new TransportRequestError(
-      "The transport response descriptor is invalid.",
-
-      0,
-
-      "transport_error",
-    )
-  }
-
-  return parsed
-}
-
-function isResponseDescriptor(value: unknown): value is ResponseDescriptor {
-  if (!value || typeof value !== "object") return false
-
-  const descriptor = value as Partial<ResponseDescriptor>
-
-  return (
-    typeof descriptor.contentType === "string" &&
-    typeof descriptor.body === "string" &&
-    (descriptor.bodyEncoding === "utf8" ||
-      descriptor.bodyEncoding === "base64") &&
-    !!descriptor.headers &&
-    typeof descriptor.headers === "object" &&
-    Object.values(descriptor.headers).every(
-      (header) => typeof header === "string",
-    )
-  )
-}
-
-function decodeResponseBody(descriptor: ResponseDescriptor): unknown {
-  if (descriptor.bodyEncoding === "base64") {
-    return decodeBase64(descriptor.body)
-  }
-
-  if (descriptor.contentType.toLowerCase().includes("json")) {
-    try {
-      return JSON.parse(descriptor.body)
-    } catch {
-      return descriptor.body
-    }
-  }
-
-  return descriptor.body
-}
-
-function decodeBase64(value: string): Uint8Array {
-  const binary = atob(value)
-
-  const bytes = new Uint8Array(binary.length)
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index)
-  }
-
-  return bytes
-}
-
-function createResponseError(
-  response: Response,
-
-  headers: Headers,
-
-  data: unknown,
-): TransportRequestError {
-  const error = isErrorPayload(data) ? data.error : undefined
-
-  return new TransportRequestError(
-    error?.message ?? `The API request failed with status ${response.status}.`,
-
-    response.status,
-
-    error?.code ?? "api_error",
-
-    headers.get("x-request-id") ?? undefined,
-
-    data,
-  )
-}
-
-function isErrorPayload(
-  value: unknown,
-): value is {
-  error: {
-    code?: string
-
-    message?: string
-  }
-} {
-  if (!value || typeof value !== "object" || !("error" in value)) return false
-
-  const error = value.error
-
-  return !!error && typeof error === "object"
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
