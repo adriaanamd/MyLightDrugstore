@@ -116,11 +116,11 @@ The endpoint ownership is:
 | `entities/inventory` | summary, lots, receipts, adjustments, movements |
 | `entities/sale` | sale list/detail/create, add/remove item, mark paid, cancel |
 | `entities/report` | inventory and sales reports |
-| `entities/backup` | backup request/status/download |
+| `entities/backup` | backup request/status/download; browser-session job tracking remains in the backup feature because the current backend has no history-list endpoint |
 | `entities/system` | server time |
 | `shared/api/transport` | public-key bootstrap and encrypted HTTP request/response processing |
 
-Feature slices will own mutations, form validation, idempotency-key lifetime, error presentation, and cache/refetch decisions. Pages and widgets will consume feature/entity public APIs rather than calling `fetch` or a transport client directly.
+Feature slices will own mutations, form validation, idempotency-key lifetime, error presentation, cache/refetch decisions, and the in-memory list of backup jobs requested during the current browser session. Pages and widgets will consume feature/entity public APIs rather than calling `fetch` or a transport client directly.
 
 Sale creation, sale-item addition, and stock receipt actions will generate one idempotency key per user action and reuse it when that same action is retried. Backup downloads will request binary data through the encrypted transport, create a temporary `Blob` URL, trigger the browser download, and revoke the URL.
 
@@ -173,3 +173,4 @@ The work is complete only when:
 5. CSRF, HTTP-only session cookies, idempotency keys, role checks, and encrypted binary downloads work through the frontend boundary.
 6. FSD boundary tests, transport tests, typecheck, format check, build, and applicable CI checks pass with fresh output.
 
+The frontend phase does not add backend routes. Because the current Laravel contract exposes backup request, status, and download operations but no backup-history list operation, the backup page keeps the existing table and displays jobs requested during the current browser session. A later backend phase may add history listing without changing this frontend boundary.

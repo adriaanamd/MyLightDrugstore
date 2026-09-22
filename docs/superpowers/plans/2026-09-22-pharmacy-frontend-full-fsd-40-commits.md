@@ -14,7 +14,7 @@
 - Change system architecture only. UI changes are out of scope unless required to preserve an existing interaction after an API migration.
 - Do not use local mock data, `mockApi`, `MockApiClient`, `createSeedDb`, or local-storage session credentials in production code.
 - Keep authentication session state in Laravel's HTTP-only cookie; keep CSRF and transport state in memory.
-- Do not change Laravel business logic or transport protocol unless a verified frontend/backend contract mismatch requires a narrowly scoped backend correction.
+- Do not change Laravel business logic or transport protocol in this frontend phase.
 - Preserve existing tests and quality gates; add tests for new transport, adapter, and boundary behavior.
 - Do not reset or discard the existing dirty working tree. Stage only files belonging to the current checkpoint.
 - Produce exactly 40 non-empty commits, one commit per task below. Do not create an aggregate migration commit.
@@ -38,7 +38,7 @@ Every implementation step and every one of the 40 implementation commits must sa
 | --- | --- |
 | `src/shared/api/transport/**` | Public-key bootstrap, RSA wrapping, AES-GCM envelopes, response decoding, CSRF memory state, transport errors |
 | `src/shared/api/http/**` | Typed API error normalization, request IDs, URL/query helpers, shared response envelopes |
-| `src/entities/**` | Wire types, domain models, mappers, and endpoint clients for medicines, inventory, sales, users, reports, backups, and system time |
+| `src/entities/**` | Wire types, domain models, mappers, and endpoint clients for medicines, inventory, sales, users, reports, backup request/status/download, and system time |
 | `src/features/**` | Auth/session, forms, mutations, idempotency keys, permission-aware actions, and page-facing hooks |
 | `src/widgets/**` | App shell and multi-entity screen compositions, preserving existing visual markup |
 | `src/pages/**` | Route-level screen components, preserving current page bodies and visual behavior |
@@ -235,7 +235,7 @@ Every implementation step and every one of the 40 implementation commits must sa
 
 **Files:** Modify `src/entities/user/api/user-client.ts`; modify `src/entities/report/api/report-client.ts`; modify `src/entities/backup/api/backup-client.ts`; create `src/entities/system/api/system-client.ts`; update corresponding `index.ts` files; create `tests/entities/operational-client.test.ts`.
 
-**Interfaces:** Expose typed user CRUD, report filters, backup request/status/download returning `Uint8Array`, and `getServerTime()` returning `{ now: string }`.
+**Interfaces:** Expose typed user CRUD, report filters, backup request/status/download returning `Uint8Array`, and `getServerTime()` returning `{ now: string }`. Do not invent a backup-history list endpoint; the backup feature owns the browser-session list of jobs returned by `request` and `status`.
 
 - [ ] Write request-recording tests for admin user APIs, reports, `/backups`, `/backups/{id}`, `/backups/{id}/download`, and `/system/time`.
 - [ ] Run the focused test; expect failure for missing system/binary behavior.
@@ -307,7 +307,7 @@ Every implementation step and every one of the 40 implementation commits must sa
 
 **Files:** Create `src/features/password-change/**`; create `src/features/staff-management/**`; create `src/features/backup-management/**`; create `tests/features/admin-operations.test.ts`.
 
-**Interfaces:** Password change calls `changePassword`; staff actions expose create/update/deactivate; backup actions expose request/status/download and accept a Blob download callback.
+**Interfaces:** Password change calls `changePassword`; staff actions expose create/update/deactivate; backup actions expose request/status/download, maintain an in-memory `BackupJob[]` for jobs created in the current browser session, and accept a Blob download callback.
 
 - [ ] Write tests for current/new password validation, staff role/active payloads, admin-only action guards, and binary-to-Blob download handling.
 - [ ] Run the focused test; expect failure.
@@ -391,7 +391,7 @@ Every implementation step and every one of the 40 implementation commits must sa
 
 **Files:** Create `src/pages/reports/**`; create `src/pages/security/security-page.tsx`; create `src/pages/admin/users-page.tsx`; create `src/pages/backups/backups-page.tsx`; create `tests/pages/operations-pages.test.tsx`.
 
-**Interfaces:** Reports consume report entities; security/admin/backups consume their feature slices; role denial is enforced by route and feature guards.
+**Interfaces:** Reports consume report entities; security/admin/backups consume their feature slices; the backups page keeps its existing table but reads the feature-owned browser-session job list because no backend history-list endpoint exists; role denial is enforced by route and feature guards.
 
 - [ ] Write tests for date filters, password change, staff deactivation, admin-only rendering, backup request/status/download, and generic API errors.
 - [ ] Run the focused test; expect failure.
@@ -557,6 +557,7 @@ pnpm run build
 ## Plan self-review
 
 - The design's UI-preservation constraint is covered by Commits 17, 22, 23, and 24–28.
+- The frontend-only boundary is explicit: no backend route is added, and backup history is limited to the feature-owned in-memory browser-session list until a later backend phase adds history listing.
 - The strict typing, final-code, focused-OOP, readability, maintainability, and debuggability requirements are global acceptance criteria for every commit and are mechanically checked in Commit 35 plus TypeScript/format gates.
 - AES-256-GCM protocol requirements are covered by Commits 02–08 and 36.
 - CSRF, cookies, error normalization, idempotency, binary downloads, and role checks are covered by Commits 07–10, 14–21, and 36–37.
