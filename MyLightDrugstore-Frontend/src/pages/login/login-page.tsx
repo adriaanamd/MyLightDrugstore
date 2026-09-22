@@ -12,14 +12,14 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  if (user) return <Navigate to={"/dashboard" as never} replace />
+  if (user) return <Navigate to="/dashboard" replace />
 
   const handleLogin = async (u: string, p: string) => {
     setLoading(true)
     setError("")
     try {
       await login({ username: u, password: p })
-      void navigate({ to: "/dashboard" as never })
+      void navigate({ to: "/dashboard" })
     } catch (cause: unknown) {
       setError(normalizeApiError(cause).message)
     } finally {

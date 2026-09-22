@@ -114,7 +114,7 @@ export default function SalesCartPage() {
               <p className="text-sm text-slate-500 mb-4">
                 This sale has been {sale.state}.
               </p>
-              <Link to={"/sales/new" as never}>
+              <Link to="/sales/new">
                 <Button>Start New Sale</Button>
               </Link>
             </div>
@@ -123,7 +123,7 @@ export default function SalesCartPage() {
               title="No open sale"
               description="Start a new sale to add items to the cart."
               action={
-                <Link to={"/sales/new" as never}>
+                <Link to="/sales/new">
                   <Button>New Sale</Button>
                 </Link>
               }
@@ -145,12 +145,16 @@ export default function SalesCartPage() {
         subtitle={`Sale ${sale.id} · Started ${formatDateTime(sale.createdAt)}`}
         action={
           <div className="flex gap-2">
-            <Link to={"/sales/new" as never}>
+            <Link to="/sales/new">
               <Button variant="outline" size="sm">
                 + Add Item
               </Button>
             </Link>
-            <Link to={`/sales/print/${sale.id}` as never} target="_blank">
+            <Link
+              to="/sales/print/$saleId"
+              params={{ saleId: String(sale.id) }}
+              target="_blank"
+            >
               <Button variant="ghost" size="sm">
                 🖨 Print Order
               </Button>
@@ -206,7 +210,7 @@ export default function SalesCartPage() {
                     >
                       Cart is empty —{" "}
                       <Link
-                        to={"/sales/new" as never}
+                        to="/sales/new"
                         className="text-teal-600 hover:underline"
                       >
                         add items
@@ -301,13 +305,14 @@ export default function SalesCartPage() {
               >
                 ✓ Mark Paid
               </Button>
-              <Link to={"/sales/new" as never} className="block">
+              <Link to="/sales/new" className="block">
                 <Button variant="outline" className="w-full">
                   + Add Another Item
                 </Button>
               </Link>
               <Link
-                to={`/sales/print/${sale.id}` as never}
+                to="/sales/print/$saleId"
+                params={{ saleId: String(sale.id) }}
                 target="_blank"
                 className="block"
               >

@@ -88,7 +88,7 @@ export default function SalesListPage() {
         title="Sale History"
         subtitle={`${total} sales`}
         action={
-          <Link to={"/sales/new" as never}>
+          <Link to="/sales/new">
             <Button size="sm">+ New Sale</Button>
           </Link>
         }
@@ -211,7 +211,8 @@ export default function SalesListPage() {
                         </button>
                         {sale.state !== "cancelled" && (
                           <Link
-                            to={`/sales/print/${sale.id}` as never}
+                            to="/sales/print/$saleId"
+                            params={{ saleId: String(sale.id) }}
                             target="_blank"
                             className="text-xs text-slate-500 hover:underline"
                           >
@@ -220,7 +221,7 @@ export default function SalesListPage() {
                         )}
                         {sale.state === "open" && (
                           <Link
-                            to={"/sales/cart" as never}
+                            to="/sales/cart"
                             className="text-xs text-navy-600 hover:underline"
                           >
                             Cart
@@ -253,14 +254,18 @@ export default function SalesListPage() {
         footer={
           <div className="flex items-center gap-2 w-full">
             {detail && detail.state !== "cancelled" && (
-              <Link to={`/sales/print/${detail.id}` as never} target="_blank">
+              <Link
+                to="/sales/print/$saleId"
+                params={{ saleId: String(detail.id) }}
+                target="_blank"
+              >
                 <Button variant="outline" size="sm">
                   🖨 Print
                 </Button>
               </Link>
             )}
             {detail?.state === "open" && (
-              <Link to={"/sales/cart" as never}>
+              <Link to="/sales/cart">
                 <Button size="sm">Open Cart</Button>
               </Link>
             )}

@@ -9,12 +9,37 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SplatRouteImport } from './routes/$'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as BackupsRouteImport } from './routes/backups'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as CatalogMedicinesRouteImport } from './routes/catalog/medicines'
+import { Route as InventoryIndexRouteImport } from './routes/inventory/index'
+import { Route as InventoryAdjustmentsRouteImport } from './routes/inventory/adjustments'
+import { Route as InventoryMovementsRouteImport } from './routes/inventory/movements'
+import { Route as InventoryReceiptsRouteImport } from './routes/inventory/receipts'
+import { Route as ReportsInventoryRouteImport } from './routes/reports/inventory'
+import { Route as ReportsSalesRouteImport } from './routes/reports/sales'
+import { Route as SalesIndexRouteImport } from './routes/sales/index'
+import { Route as SalesCartRouteImport } from './routes/sales/cart'
+import { Route as SalesNewRouteImport } from './routes/sales/new'
+import { Route as SettingsSecurityRouteImport } from './routes/settings/security'
+import { Route as SalesPrintSaleIdRouteImport } from './routes/sales/print/$saleId'
 
-const SplatRoute = SplatRouteImport.update({
-  id: '/$',
-  path: '/$',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupsRoute = BackupsRouteImport.update({
+  id: '/backups',
+  path: '/backups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -22,40 +47,231 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogMedicinesRoute = CatalogMedicinesRouteImport.update({
+  id: '/catalog/medicines',
+  path: '/catalog/medicines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryIndexRoute = InventoryIndexRouteImport.update({
+  id: '/inventory/',
+  path: '/inventory/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryAdjustmentsRoute = InventoryAdjustmentsRouteImport.update({
+  id: '/inventory/adjustments',
+  path: '/inventory/adjustments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryMovementsRoute = InventoryMovementsRouteImport.update({
+  id: '/inventory/movements',
+  path: '/inventory/movements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryReceiptsRoute = InventoryReceiptsRouteImport.update({
+  id: '/inventory/receipts',
+  path: '/inventory/receipts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsInventoryRoute = ReportsInventoryRouteImport.update({
+  id: '/reports/inventory',
+  path: '/reports/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsSalesRoute = ReportsSalesRouteImport.update({
+  id: '/reports/sales',
+  path: '/reports/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesIndexRoute = SalesIndexRouteImport.update({
+  id: '/sales/',
+  path: '/sales/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesCartRoute = SalesCartRouteImport.update({
+  id: '/sales/cart',
+  path: '/sales/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesNewRoute = SalesNewRouteImport.update({
+  id: '/sales/new',
+  path: '/sales/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
+  id: '/settings/security',
+  path: '/settings/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalesPrintSaleIdRoute = SalesPrintSaleIdRouteImport.update({
+  id: '/sales/print/$saleId',
+  path: '/sales/print/$saleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/$': typeof SplatRoute
+  '/': typeof IndexRoute
+  '/backups': typeof BackupsRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/catalog/medicines': typeof CatalogMedicinesRoute
+  '/inventory/adjustments': typeof InventoryAdjustmentsRoute
+  '/inventory/movements': typeof InventoryMovementsRoute
+  '/inventory/receipts': typeof InventoryReceiptsRoute
+  '/reports/inventory': typeof ReportsInventoryRoute
+  '/reports/sales': typeof ReportsSalesRoute
+  '/sales/cart': typeof SalesCartRoute
+  '/sales/new': typeof SalesNewRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/inventory/': typeof InventoryIndexRoute
+  '/sales/': typeof SalesIndexRoute
+  '/sales/print/$saleId': typeof SalesPrintSaleIdRoute
 }
 export interface FileRoutesByTo {
-  '/$': typeof SplatRoute
+  '/': typeof IndexRoute
+  '/backups': typeof BackupsRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/catalog/medicines': typeof CatalogMedicinesRoute
+  '/inventory/adjustments': typeof InventoryAdjustmentsRoute
+  '/inventory/movements': typeof InventoryMovementsRoute
+  '/inventory/receipts': typeof InventoryReceiptsRoute
+  '/reports/inventory': typeof ReportsInventoryRoute
+  '/reports/sales': typeof ReportsSalesRoute
+  '/sales/cart': typeof SalesCartRoute
+  '/sales/new': typeof SalesNewRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/inventory': typeof InventoryIndexRoute
+  '/sales': typeof SalesIndexRoute
+  '/sales/print/$saleId': typeof SalesPrintSaleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/$': typeof SplatRoute
+  '/': typeof IndexRoute
+  '/backups': typeof BackupsRoute
+  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/catalog/medicines': typeof CatalogMedicinesRoute
+  '/inventory/adjustments': typeof InventoryAdjustmentsRoute
+  '/inventory/movements': typeof InventoryMovementsRoute
+  '/inventory/receipts': typeof InventoryReceiptsRoute
+  '/reports/inventory': typeof ReportsInventoryRoute
+  '/reports/sales': typeof ReportsSalesRoute
+  '/sales/cart': typeof SalesCartRoute
+  '/sales/new': typeof SalesNewRoute
+  '/settings/security': typeof SettingsSecurityRoute
+  '/inventory/': typeof InventoryIndexRoute
+  '/sales/': typeof SalesIndexRoute
+  '/sales/print/$saleId': typeof SalesPrintSaleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/$' | '/login'
+  fullPaths:
+    | '/'
+    | '/backups'
+    | '/dashboard'
+    | '/login'
+    | '/admin/users'
+    | '/catalog/medicines'
+    | '/inventory/adjustments'
+    | '/inventory/movements'
+    | '/inventory/receipts'
+    | '/reports/inventory'
+    | '/reports/sales'
+    | '/sales/cart'
+    | '/sales/new'
+    | '/settings/security'
+    | '/inventory/'
+    | '/sales/'
+    | '/sales/print/$saleId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$' | '/login'
-  id: '__root__' | '/$' | '/login'
+  to:
+    | '/'
+    | '/backups'
+    | '/dashboard'
+    | '/login'
+    | '/admin/users'
+    | '/catalog/medicines'
+    | '/inventory/adjustments'
+    | '/inventory/movements'
+    | '/inventory/receipts'
+    | '/reports/inventory'
+    | '/reports/sales'
+    | '/sales/cart'
+    | '/sales/new'
+    | '/settings/security'
+    | '/inventory'
+    | '/sales'
+    | '/sales/print/$saleId'
+  id:
+    | '__root__'
+    | '/'
+    | '/backups'
+    | '/dashboard'
+    | '/login'
+    | '/admin/users'
+    | '/catalog/medicines'
+    | '/inventory/adjustments'
+    | '/inventory/movements'
+    | '/inventory/receipts'
+    | '/reports/inventory'
+    | '/reports/sales'
+    | '/sales/cart'
+    | '/sales/new'
+    | '/settings/security'
+    | '/inventory/'
+    | '/sales/'
+    | '/sales/print/$saleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  SplatRoute: typeof SplatRoute
+  IndexRoute: typeof IndexRoute
+  BackupsRoute: typeof BackupsRoute
+  DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  CatalogMedicinesRoute: typeof CatalogMedicinesRoute
+  InventoryAdjustmentsRoute: typeof InventoryAdjustmentsRoute
+  InventoryMovementsRoute: typeof InventoryMovementsRoute
+  InventoryReceiptsRoute: typeof InventoryReceiptsRoute
+  ReportsInventoryRoute: typeof ReportsInventoryRoute
+  ReportsSalesRoute: typeof ReportsSalesRoute
+  SalesCartRoute: typeof SalesCartRoute
+  SalesNewRoute: typeof SalesNewRoute
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
+  InventoryIndexRoute: typeof InventoryIndexRoute
+  SalesIndexRoute: typeof SalesIndexRoute
+  SalesPrintSaleIdRoute: typeof SalesPrintSaleIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/$': {
-      id: '/$'
-      path: '/$'
-      fullPath: '/$'
-      preLoaderRoute: typeof SplatRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backups': {
+      id: '/backups'
+      path: '/backups'
+      fullPath: '/backups'
+      preLoaderRoute: typeof BackupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -65,12 +281,118 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalog/medicines': {
+      id: '/catalog/medicines'
+      path: '/catalog/medicines'
+      fullPath: '/catalog/medicines'
+      preLoaderRoute: typeof CatalogMedicinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory/': {
+      id: '/inventory/'
+      path: '/inventory'
+      fullPath: '/inventory/'
+      preLoaderRoute: typeof InventoryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory/adjustments': {
+      id: '/inventory/adjustments'
+      path: '/inventory/adjustments'
+      fullPath: '/inventory/adjustments'
+      preLoaderRoute: typeof InventoryAdjustmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory/movements': {
+      id: '/inventory/movements'
+      path: '/inventory/movements'
+      fullPath: '/inventory/movements'
+      preLoaderRoute: typeof InventoryMovementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory/receipts': {
+      id: '/inventory/receipts'
+      path: '/inventory/receipts'
+      fullPath: '/inventory/receipts'
+      preLoaderRoute: typeof InventoryReceiptsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/inventory': {
+      id: '/reports/inventory'
+      path: '/reports/inventory'
+      fullPath: '/reports/inventory'
+      preLoaderRoute: typeof ReportsInventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/sales': {
+      id: '/reports/sales'
+      path: '/reports/sales'
+      fullPath: '/reports/sales'
+      preLoaderRoute: typeof ReportsSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales/': {
+      id: '/sales/'
+      path: '/sales'
+      fullPath: '/sales/'
+      preLoaderRoute: typeof SalesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales/cart': {
+      id: '/sales/cart'
+      path: '/sales/cart'
+      fullPath: '/sales/cart'
+      preLoaderRoute: typeof SalesCartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales/new': {
+      id: '/sales/new'
+      path: '/sales/new'
+      fullPath: '/sales/new'
+      preLoaderRoute: typeof SalesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/security': {
+      id: '/settings/security'
+      path: '/settings/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sales/print/$saleId': {
+      id: '/sales/print/$saleId'
+      path: '/sales/print/$saleId'
+      fullPath: '/sales/print/$saleId'
+      preLoaderRoute: typeof SalesPrintSaleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  SplatRoute: SplatRoute,
+  IndexRoute: IndexRoute,
+  BackupsRoute: BackupsRoute,
+  DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  CatalogMedicinesRoute: CatalogMedicinesRoute,
+  InventoryAdjustmentsRoute: InventoryAdjustmentsRoute,
+  InventoryMovementsRoute: InventoryMovementsRoute,
+  InventoryReceiptsRoute: InventoryReceiptsRoute,
+  ReportsInventoryRoute: ReportsInventoryRoute,
+  ReportsSalesRoute: ReportsSalesRoute,
+  SalesCartRoute: SalesCartRoute,
+  SalesNewRoute: SalesNewRoute,
+  SettingsSecurityRoute: SettingsSecurityRoute,
+  InventoryIndexRoute: InventoryIndexRoute,
+  SalesIndexRoute: SalesIndexRoute,
+  SalesPrintSaleIdRoute: SalesPrintSaleIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -8,11 +8,11 @@ import { useState } from "react"
 import type { ReactNode } from "react"
 import { useAuthSession } from "@/features/auth"
 
-import { getNavigationForRole } from "../model/navigation"
+import { getNavigationForRole, type NavigationPath } from "../model/navigation"
 import { useServerClock } from "../model/use-server-clock"
 
 type NavLinkProps = {
-  to: string
+  to: NavigationPath
   title?: string
   className?: (options: { isActive: boolean }) => string
   children: ReactNode
@@ -25,11 +25,7 @@ function NavLink({ to, title, className, children }: NavLinkProps) {
   const isActive = pathname === to || pathname.startsWith(`${to}/`)
 
   return (
-    <TanStackLink
-      to={to as never}
-      title={title}
-      className={className?.({ isActive })}
-    >
+    <TanStackLink to={to} title={title} className={className?.({ isActive })}>
       {children}
     </TanStackLink>
   )
@@ -37,7 +33,7 @@ function NavLink({ to, title, className, children }: NavLinkProps) {
 
 interface NavItem {
   label: string
-  to: string
+  to: NavigationPath
   icon: React.ReactNode
   adminOnly?: boolean
 }
@@ -56,7 +52,12 @@ function Icon({ d }: { d: string }) {
   )
 }
 
-const navGroups = [
+interface NavGroup {
+  label: string
+  items: NavItem[]
+}
+
+const navGroups: NavGroup[] = [
   {
     label: "Overview",
     items: [
@@ -197,7 +198,7 @@ export default function AppShell({ children }: { children?: React.ReactNode }) {
 
   const handleLogout = async () => {
     await logout()
-    void navigate({ to: "/login" as never })
+    void navigate({ to: "/login" })
   }
 
   return (

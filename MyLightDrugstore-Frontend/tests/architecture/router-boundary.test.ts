@@ -12,17 +12,18 @@ describe("router architecture", () => {
   it("uses the router package directly in application source", () => {
     const sourceRoot = resolve(process.cwd(), "src")
     const routeSource = readFileSync(
-      resolve(sourceRoot, "routes/$.tsx"),
+      resolve(sourceRoot, "routes/dashboard.tsx"),
       "utf8",
     )
 
     expect(routeSource).toContain("@tanstack/react-router")
     expect(routeSource).not.toContain("router-compat")
+    expect(existsSync(resolve(sourceRoot, "routes/$.tsx"))).toBe(false)
   })
 
   it("gates protected content on the feature auth session", () => {
     const routeSource = readFileSync(
-      resolve(process.cwd(), "src/routes/$.tsx"),
+      resolve(process.cwd(), "src/app/router/authenticated-page.tsx"),
       "utf8",
     )
 

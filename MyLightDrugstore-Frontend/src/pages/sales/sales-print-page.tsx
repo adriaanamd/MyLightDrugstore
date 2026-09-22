@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useRouterState } from "@tanstack/react-router"
+import { useParams } from "@tanstack/react-router"
 import { createSaleApi, type Sale } from "@/entities/sale"
 import { apiClient } from "@/shared/api/api-client"
 import { formatPHP, formatDateTime } from "@/shared/ui"
@@ -7,10 +7,7 @@ import { formatPHP, formatDateTime } from "@/shared/ui"
 const saleApi = createSaleApi(apiClient.transport)
 
 export default function SalesPrintPage() {
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  })
-  const saleId = pathname.match(/\/sales\/print\/([^/]+)/)?.[1]
+  const { saleId } = useParams({ from: "/sales/print/$saleId" })
   const [sale, setSale] = useState<Sale | null>(null)
   const [error, setError] = useState("")
 

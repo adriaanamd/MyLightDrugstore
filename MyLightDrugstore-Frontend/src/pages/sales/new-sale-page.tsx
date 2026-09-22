@@ -113,7 +113,7 @@ export default function SalesNewPage() {
         })
         showToast(`Sale created with ${selectedMed.genericName}.`)
       }
-      void navigate({ to: "/sales/cart" as never })
+      void navigate({ to: "/sales/cart" })
     } catch (cause: unknown) {
       setError(normalizeApiError(cause).message)
     } finally {

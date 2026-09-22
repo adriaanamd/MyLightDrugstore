@@ -121,12 +121,12 @@ export default function InventoryPage() {
         subtitle="Current inventory status"
         action={
           <div className="flex gap-2">
-            <Link to={"/inventory/receipts" as never}>
+            <Link to="/inventory/receipts">
               <Button variant="secondary" size="sm">
                 Receive Stock
               </Button>
             </Link>
-            <Link to={"/inventory/adjustments" as never}>
+            <Link to="/inventory/adjustments">
               <Button variant="outline" size="sm">
                 Adjustments
               </Button>

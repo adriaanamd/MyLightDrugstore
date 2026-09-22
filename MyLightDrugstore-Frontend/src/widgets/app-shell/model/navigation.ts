@@ -1,6 +1,8 @@
 import type { UserRole } from "@/entities/user"
 
-const staffPaths = [
+export type NavigationPath = "/dashboard" | "/catalog/medicines" | "/inventory" | "/inventory/receipts" | "/inventory/adjustments" | "/inventory/movements" | "/sales/new" | "/sales/cart" | "/sales" | "/reports/inventory" | "/reports/sales" | "/settings/security" | "/admin/users" | "/backups"
+
+const staffPaths: NavigationPath[] = [
   "/dashboard",
   "/catalog/medicines",
   "/inventory",
@@ -15,9 +17,11 @@ const staffPaths = [
   "/settings/security",
 ]
 
-const adminPaths = ["/admin/users", "/backups"]
+const adminPaths: NavigationPath[] = ["/admin/users", "/backups"]
 
-export function getNavigationForRole(role: UserRole | undefined): string[] {
+export function getNavigationForRole(
+  role: UserRole | undefined,
+): NavigationPath[] {
   if (role === "admin") {
     return [...staffPaths, ...adminPaths]
   }

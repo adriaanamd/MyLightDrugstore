@@ -113,7 +113,7 @@ export default function DashboardPage() {
         subtitle="Operational overview"
         action={
           <Link
-            to={"/sales/new" as never}
+            to="/sales/new"
             className="inline-flex items-center gap-1.5 bg-teal-600 text-white text-sm font-medium px-3.5 py-2 rounded-lg hover:bg-teal-700 transition-colors"
           >
             <svg
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                   className="!py-1 !text-xs w-40"
                 />
                 <Link
-                  to={"/catalog/medicines" as never}
+                  to="/catalog/medicines"
                   className="text-xs text-teal-600 hover:underline whitespace-nowrap"
                 >
                   View all
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                 Recent Sales
               </h2>
               <Link
-                to={"/sales" as never}
+                to="/sales"
                 className="text-xs text-teal-600 hover:underline"
               >
                 View all
@@ -303,7 +303,7 @@ export default function DashboardPage() {
 
           {/* Quick actions */}
           <div className="mt-4 grid grid-cols-2 gap-2">
-            {[
+            {([
               {
                 label: "Receive Stock",
                 to: "/inventory/receipts",
@@ -316,10 +316,10 @@ export default function DashboardPage() {
               },
               { label: "Inventory", to: "/inventory", color: "bg-teal-600" },
               { label: "Reports", to: "/reports/sales", color: "bg-slate-600" },
-            ].map((a) => (
+            ] as const).map((a) => (
               <Link
                 key={a.to}
-                to={a.to as never}
+                to={a.to}
                 className={`${a.color} text-white text-xs font-medium px-3 py-2.5 rounded-lg hover:opacity-90 transition-opacity text-center`}
               >
                 {a.label}
