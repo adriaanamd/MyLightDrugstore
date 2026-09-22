@@ -50,7 +50,7 @@ Every implementation step and every one of the 40 implementation commits must sa
 
 ## Commit 01: Establish frontend quality commands
 
-**Files:** Modify `MyLightDrugstore-Frontend/package.json`; create `MyLightDrugstore-Frontend/vitest.config.ts`; create `MyLightDrugstore-Frontend/tests/setup.ts`.
+**Files:** Modify `MyLightDrugstore-Frontend/package.json`; create `MyLightDrugstore-Frontend/vitest.config.ts`; create `MyLightDrugstore-Frontend/tests/setup.ts`; create `MyLightDrugstore-Frontend/tests/package-scripts.test.mjs`; create `MyLightDrugstore-Frontend/tests/unit/package-scripts.test.ts`; modify `MyLightDrugstore-Frontend/src/pages/BackupsPage.tsx` only to await its already-async legacy adapter calls so strict typechecking can start from a typed baseline.
 
 **Interfaces:** Add scripts `typecheck`, `format:check`, `test:unit`, `test:architecture`, and `test`; configure Vitest to run `tests/**/*.test.ts` and `tests/**/*.test.tsx` without changing application runtime.
 
@@ -72,6 +72,7 @@ Every implementation step and every one of the 40 implementation commits must sa
 
 - [ ] Run `pnpm exec node --test tests/package-scripts.test.mjs`; expect PASS.
 - [ ] Run `pnpm run typecheck`; record any pre-existing failures without changing unrelated behavior.
+- [ ] If the baseline typecheck reports the existing `BackupsPage.tsx` async mismatch, change only `load`/`handleRequest` to await `listBackups`/`requestBackup`, invoke polling with `void load()`, and preserve every rendered element/class/string.
 - [ ] Commit as `build(frontend): establish quality commands`.
 
 ## Commit 02: Define transport protocol types and base64url codec
