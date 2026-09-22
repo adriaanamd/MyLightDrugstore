@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
-import type { Medicine } from "../shared/api/types"
-import { MockApiError } from "../shared/api/types"
+import { useNavigate } from "@/shared/router-compat"
+import { createMedicineApi, type Medicine } from "@/entities/medicine"
+import { createSaleApi } from "@/entities/sale"
+import { createSalesEntryActions } from "@/features/sales-entry"
+import { normalizeApiError } from "@/shared/api"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -19,7 +21,11 @@ import {
   formatPHP,
   EmptyState,
   Spinner,
-} from "../shared/ui"
+} from "@/shared/ui"
+
+const medicineApi = createMedicineApi(apiClient.transport)
+const saleApi = createSaleApi(apiClient.transport)
+const salesEntryActions = createSalesEntryActions(saleApi)
 
 export default function SalesNewPage() {
   const navigate = useNavigate()
@@ -42,14 +48,15 @@ export default function SalesNewPage() {
       return
     }
     try {
-      const med = await mockApi.getMedicine(code)
+      const med = await medicineApi.show(Number(code))
       if (!med.active) {
         setError("This medicine is archived and unavailable.")
         return
       }
       setSelectedMed(med)
-    } catch (e) {
-      if (e instanceof MockApiError && e.status === 404)
+    } catch (cause: unknown) {
+      const error = normalizeApiError(cause)
+      if (error.status === 404)
         setError(`No medicine found with code "${code}".`)
       else setError("Lookup failed.")
     }
@@ -60,7 +67,7 @@ export default function SalesNewPage() {
     setPickerLoading(true)
     const loadMedicines = async () => {
       try {
-        const res = await mockApi.listMedicines({
+        const res = await medicineApi.list({
           q: pickerQ,
           active: true,
           perPage: 20,
@@ -92,26 +99,23 @@ export default function SalesNewPage() {
     }
     setLoading(true)
     try {
-      const openSales = await mockApi.listSales({ state: "open", perPage: 1 })
+      const openSales = await saleApi.list({ state: "open", perPage: 1 })
       const openSale = openSales.data[0]
       if (openSale) {
-        await mockApi.addSaleItem(
-          openSale.id,
-          { medicineId: selectedMed.id, quantity: qty },
-          `add_${Date.now()}`,
-        )
+        await salesEntryActions.addItem(openSale.id, {
+          medicineId: selectedMed.id,
+          quantity: qty,
+        })
         showToast(`${selectedMed.genericName} added to cart.`)
       } else {
-        await mockApi.createSale(
-          [{ medicineId: selectedMed.id, quantity: qty }],
-          `sale_${Date.now()}`,
-        )
+        await salesEntryActions.create({
+          items: [{ medicineId: selectedMed.id, quantity: qty }],
+        })
         showToast(`Sale created with ${selectedMed.genericName}.`)
       }
       navigate("/sales/cart")
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
-      else setError("Failed to add to sale.")
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setLoading(false)
     }
@@ -283,7 +287,7 @@ export default function SalesNewPage() {
                   key={m.id}
                   onClick={() => {
                     setSelectedMed(m)
-                    setItemCode(m.id)
+                    setItemCode(String(m.id))
                     setPickerOpen(false)
                   }}
                 >

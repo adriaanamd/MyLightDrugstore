@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { useNavigate, Link } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
-import type { Sale, SaleItem } from "../shared/api/types"
-import { MockApiError } from "../shared/api/types"
+import { useNavigate, Link } from "@/shared/router-compat"
+import { createSaleApi, type Sale, type SaleItem } from "@/entities/sale"
+import { createSalesCartActions } from "@/features/sales-cart"
+import { normalizeApiError } from "@/shared/api"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -20,7 +21,10 @@ import {
   formatPHP,
   formatDateTime,
   EmptyState,
-} from "../shared/ui"
+} from "@/shared/ui"
+
+const saleApi = createSaleApi(apiClient.transport)
+const salesCartActions = createSalesCartActions(saleApi)
 
 export default function SalesCartPage() {
   const navigate = useNavigate()
@@ -39,7 +43,7 @@ export default function SalesCartPage() {
 
   const load = async () => {
     try {
-      const result = await mockApi.listSales({ state: "open", perPage: 1 })
+      const result = await saleApi.list({ state: "open", perPage: 1 })
       setSale(result.data[0] ?? null)
     } catch {
       /* ignore */
@@ -54,12 +58,12 @@ export default function SalesCartPage() {
     if (!sale || !removeItem) return
     setRemoveLoading(true)
     try {
-      const updated = await mockApi.removeSaleItem(sale.id, removeItem.id)
+      const updated = await salesCartActions.removeItem(sale.id, removeItem.id)
       setSale(updated)
       setRemoveItem(null)
       showToast("Item removed and stock restored.")
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setRemoveLoading(false)
     }
@@ -69,12 +73,12 @@ export default function SalesCartPage() {
     if (!sale) return
     setPayLoading(true)
     try {
-      const updated = await mockApi.markSalePaid(sale.id)
+      const updated = await salesCartActions.markPaid(sale.id)
       setSale(updated)
       setPaying(false)
       showToast("Sale marked as paid and completed.")
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setPayLoading(false)
     }
@@ -84,12 +88,12 @@ export default function SalesCartPage() {
     if (!sale) return
     setCancelLoading(true)
     try {
-      await mockApi.cancelSale(sale.id, cancelReason)
+      await salesCartActions.cancel(sale.id, cancelReason)
       setCancelling(false)
       showToast("Sale cancelled and stock restored.", "info")
       setSale(null)
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setCancelLoading(false)
     }
@@ -131,8 +135,9 @@ export default function SalesCartPage() {
     )
   }
 
-  const activeItems = sale.items.filter((i) => !i.removed)
-  const removedItems = sale.items.filter((i) => i.removed)
+  const saleItems = sale.items ?? []
+  const activeItems = saleItems.filter((item) => item.state === "active")
+  const removedItems = saleItems.filter((item) => item.state !== "active")
 
   return (
     <div>

@@ -111,6 +111,12 @@ function readSale(value: unknown): Sale {
     createdBy: readNumber(value.createdBy, "createdBy"),
     createdByName: readOptionalString(value.createdByName, "createdByName"),
     createdAt: readString(value.createdAt, "createdAt"),
+    completedAt: readOptionalString(value.completedAt, "completedAt"),
+    cancelledAt: readOptionalString(value.cancelledAt, "cancelledAt"),
+    cancellationReason: readOptionalString(
+      value.cancellationReason,
+      "cancellationReason",
+    ),
     cancellation:
       cancellation === undefined || cancellation === null
         ? cancellation

@@ -58,6 +58,12 @@ export type Sale = {
 
   createdAt: string
 
+  completedAt?: string
+
+  cancelledAt?: string
+
+  cancellationReason?: string
+
   cancellation?: SaleCancellation | null
 }
 

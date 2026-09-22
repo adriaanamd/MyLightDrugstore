@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react"
-import { Link } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
-import type { Sale } from "../shared/api/types"
+import { Link } from "@/shared/router-compat"
+import {
+  createSaleApi,
+  type PaymentStatus,
+  type Sale,
+  type SaleState,
+} from "@/entities/sale"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Card,
@@ -19,7 +24,9 @@ import {
   Pagination,
   EmptyState,
   Spinner,
-} from "../shared/ui"
+} from "@/shared/ui"
+
+const saleApi = createSaleApi(apiClient.transport)
 
 function stateBadge(sale: Sale) {
   if (sale.state === "cancelled") return <Badge variant="gray">Cancelled</Badge>
@@ -41,8 +48,8 @@ export default function SalesListPage() {
   const [sales, setSales] = useState<Sale[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [stateFilter, setStateFilter] = useState("")
-  const [payFilter, setPayFilter] = useState("")
+  const [stateFilter, setStateFilter] = useState<"" | SaleState>("")
+  const [payFilter, setPayFilter] = useState<"" | PaymentStatus>("")
   const [fromDate, setFromDate] = useState("")
   const [toDate, setToDate] = useState("")
   const [loading, setLoading] = useState(true)
@@ -51,7 +58,7 @@ export default function SalesListPage() {
   const load = async () => {
     setLoading(true)
     try {
-      const result = await mockApi.listSales({
+      const result = await saleApi.list({
         state: stateFilter || undefined,
         paymentStatus: payFilter || undefined,
         from: fromDate || undefined,
@@ -91,7 +98,7 @@ export default function SalesListPage() {
         <div className="flex flex-wrap items-center gap-3 px-4 py-3 border-b border-slate-200">
           <Select
             value={stateFilter}
-            onChange={(e) => setStateFilter(e.target.value)}
+            onChange={(e) => setStateFilter(e.target.value as "" | SaleState)}
             className="w-32"
           >
             <option value="">All states</option>
@@ -101,7 +108,7 @@ export default function SalesListPage() {
           </Select>
           <Select
             value={payFilter}
-            onChange={(e) => setPayFilter(e.target.value)}
+            onChange={(e) => setPayFilter(e.target.value as "" | PaymentStatus)}
             className="w-32"
           >
             <option value="">All payments</option>
@@ -179,7 +186,10 @@ export default function SalesListPage() {
                     <Td className="text-xs text-slate-600 whitespace-nowrap">
                       {formatDateTime(sale.createdAt)}
                     </Td>
-                    <Td>{sale.items.filter((i) => !i.removed).length}</Td>
+                    <Td>
+                      {sale.items?.filter((item) => item.state === "active")
+                        .length ?? 0}
+                    </Td>
                     <Td className="text-xs text-slate-600">
                       {sale.createdByName}
                     </Td>
@@ -313,15 +323,15 @@ export default function SalesListPage() {
                 </tr>
               </thead>
               <tbody>
-                {detail.items.map((item) => (
+                {(detail.items ?? []).map((item) => (
                   <Tr
                     key={item.id}
-                    className={item.removed ? "opacity-50" : ""}
+                    className={item.state !== "active" ? "opacity-50" : ""}
                   >
                     <Td>
                       <span
                         className={`font-medium ${
-                          item.removed
+                          item.state !== "active"
                             ? "line-through text-slate-400"
                             : "text-slate-800"
                         }`}
@@ -341,7 +351,7 @@ export default function SalesListPage() {
                       {formatPHP(item.lineTotal)}
                     </Td>
                     <Td>
-                      {item.removed ? (
+                      {item.state !== "active" ? (
                         <Badge variant="gray">Removed</Badge>
                       ) : (
                         <Badge variant="green">Active</Badge>

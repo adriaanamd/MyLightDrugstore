@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
-import { useParams } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
-import type { Sale } from "../shared/api/types"
-import { formatPHP, formatDateTime } from "../shared/ui"
+import { useParams } from "@/shared/router-compat"
+import { createSaleApi, type Sale } from "@/entities/sale"
+import { apiClient } from "@/shared/api/api-client"
+import { formatPHP, formatDateTime } from "@/shared/ui"
+
+const saleApi = createSaleApi(apiClient.transport)
 
 export default function SalesPrintPage() {
   const { saleId } = useParams<{ saleId: string }>()
@@ -12,7 +14,7 @@ export default function SalesPrintPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        if (saleId) setSale(await mockApi.getSale(saleId))
+        if (saleId) setSale(await saleApi.show(Number(saleId)))
       } catch {
         setError("Sale not found.")
       }
@@ -20,7 +22,8 @@ export default function SalesPrintPage() {
     void load()
   }, [saleId])
 
-  const activeItems = sale?.items.filter((i) => !i.removed) ?? []
+  const activeItems =
+    sale?.items?.filter((item) => item.state === "active") ?? []
 
   return (
     <div className="min-h-screen bg-white p-8 max-w-lg mx-auto">
