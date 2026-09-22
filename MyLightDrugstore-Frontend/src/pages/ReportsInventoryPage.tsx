@@ -1,31 +1,52 @@
-import { useState, useEffect } from 'react';
-import { mockApi } from '../shared/api/client';
-import type { Medicine } from '../shared/api/types';
-import { PageHeader, Button, Card, Table, Th, Td, Tr, Badge, Select, formatPHP, formatDate, EmptyState } from '../shared/ui';
+import { useState, useEffect } from "react"
+import { mockApi } from "../shared/api/client"
+import type { Medicine } from "../shared/api/types"
+import {
+  PageHeader,
+  Button,
+  Card,
+  Table,
+  Th,
+  Td,
+  Tr,
+  Badge,
+  Select,
+  formatPHP,
+  formatDate,
+  EmptyState,
+} from "../shared/ui"
 
-type EnrichedLot = ReturnType<typeof mockApi.listLots>[number];
+type EnrichedLot = Awaited<ReturnType<typeof mockApi.listLots>>[number]
 
 export default function ReportsInventoryPage() {
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [expiringLots, setExpiringLots] = useState<ReturnType<typeof mockApi.listLots> | ReturnType<typeof mockApi.getInventoryReport>['expiringLots']>([]);
-  const [threshold, setThreshold] = useState(30);
-  const [tab, setTab] = useState<'all' | 'low' | 'expiring'>('all');
-  const [expiresBefore, setExpiresBefore] = useState('');
+  const [medicines, setMedicines] = useState<Medicine[]>([])
+  const [expiringLots, setExpiringLots] = useState<EnrichedLot[]>([])
+  const [threshold, setThreshold] = useState(30)
+  const [tab, setTab] = useState<"all" | "low" | "expiring">("all")
+  const [expiresBefore, setExpiresBefore] = useState("")
 
-  const load = () => {
+  const load = async () => {
     try {
-      const result = mockApi.getInventoryReport({ lowStock: tab === 'low', expiresBefore: expiresBefore || undefined });
-      setMedicines(result.medicines);
-      setExpiringLots(result.expiringLots);
-      setThreshold(result.threshold);
-    } catch { /* ignore */ }
-  };
+      const result = await mockApi.getInventoryReport({
+        lowStock: tab === "low",
+        expiresBefore: expiresBefore || undefined,
+      })
+      setMedicines(result.medicines)
+      setExpiringLots(result.expiringLots)
+      setThreshold(result.threshold)
+    } catch {
+      /* ignore */
+    }
+  }
 
-  useEffect(() => { load(); }, [tab, expiresBefore]);
+  useEffect(() => {
+    void load()
+  }, [tab, expiresBefore])
 
-  const today = new Date().toISOString().split('T')[0];
-  const soon = new Date(); soon.setDate(soon.getDate() + 30);
-  const soonStr = soon.toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0]
+  const soon = new Date()
+  soon.setDate(soon.getDate() + 30)
+  const soonStr = soon.toISOString().split("T")[0]
 
   return (
     <div>
@@ -33,7 +54,12 @@ export default function ReportsInventoryPage() {
         title="Inventory Report"
         subtitle="Stock status, low-stock, and expiring lots"
         action={
-          <Button variant="ghost" size="sm" onClick={() => window.print()} className="no-print">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.print()}
+            className="no-print"
+          >
             🖨 Print
           </Button>
         }
@@ -43,42 +69,63 @@ export default function ReportsInventoryPage() {
         {/* Tabs + filters */}
         <div className="flex flex-wrap items-center gap-3 no-print">
           <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
-            {(['all', 'low', 'expiring'] as const).map(t => (
+            {(["all", "low", "expiring"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${tab === t ? 'bg-white shadow-sm text-slate-800 border border-slate-200' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`text-xs font-medium px-3 py-1.5 rounded-md transition-colors ${
+                  tab === t
+                    ? "bg-white shadow-sm text-slate-800 border border-slate-200"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
               >
-                {t === 'low' ? `Low Stock (<${threshold})` : t === 'expiring' ? 'Expiring Soon' : 'All Medicines'}
+                {t === "low"
+                  ? `Low Stock (<${threshold})`
+                  : t === "expiring"
+                    ? "Expiring Soon"
+                    : "All Medicines"}
               </button>
             ))}
           </div>
-          {tab === 'expiring' && (
+          {tab === "expiring" && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500">Expires before:</span>
               <input
                 type="date"
                 value={expiresBefore}
-                onChange={e => setExpiresBefore(e.target.value)}
+                onChange={(e) => setExpiresBefore(e.target.value)}
                 className="text-xs border border-slate-300 rounded px-2 py-1"
               />
-              {!expiresBefore && <span className="text-xs text-slate-400">(default: 30 days)</span>}
+              {!expiresBefore && (
+                <span className="text-xs text-slate-400">
+                  (default: 30 days)
+                </span>
+              )}
             </div>
           )}
         </div>
 
         {/* Print header */}
         <div className="hidden print:block text-center mb-6">
-          <h1 className="text-xl font-bold">MyLight Drugstore – Inventory Report</h1>
-          <p className="text-sm text-slate-500">Generated: {new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}</p>
+          <h1 className="text-xl font-bold">
+            MyLight Drugstore – Inventory Report
+          </h1>
+          <p className="text-sm text-slate-500">
+            Generated:{" "}
+            {new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" })}
+          </p>
         </div>
 
-        {tab !== 'expiring' ? (
+        {tab !== "expiring" ? (
           <Card>
             <div className="px-4 py-3 border-b border-slate-200">
               <h2 className="font-semibold text-slate-900 text-sm">
-                {tab === 'low' ? `Low Stock Medicines (< ${threshold} units)` : 'All Active Medicines'}
-                <span className="ml-2 text-slate-400 font-normal">{medicines.length} items</span>
+                {tab === "low"
+                  ? `Low Stock Medicines (< ${threshold} units)`
+                  : "All Active Medicines"}
+                <span className="ml-2 text-slate-400 font-normal">
+                  {medicines.length} items
+                </span>
               </h2>
             </div>
             <Table>
@@ -96,25 +143,55 @@ export default function ReportsInventoryPage() {
               </thead>
               <tbody>
                 {medicines.length === 0 && (
-                  <tr><td colSpan={8}><EmptyState title="No medicines in this category" /></td></tr>
+                  <tr>
+                    <td colSpan={8}>
+                      <EmptyState title="No medicines in this category" />
+                    </td>
+                  </tr>
                 )}
-                {medicines.map(m => (
+                {medicines.map((m) => (
                   <Tr key={m.id}>
-                    <Td><span className="font-mono text-xs text-slate-400">{m.id}</span></Td>
-                    <Td><span className="font-medium text-slate-800">{m.genericName}</span></Td>
+                    <Td>
+                      <span className="font-mono text-xs text-slate-400">
+                        {m.id}
+                      </span>
+                    </Td>
+                    <Td>
+                      <span className="font-medium text-slate-800">
+                        {m.genericName}
+                      </span>
+                    </Td>
                     <Td className="text-slate-500">{m.brandName}</Td>
-                    <Td className="text-xs text-slate-400">{m.dosageForm} · {m.strength}</Td>
+                    <Td className="text-xs text-slate-400">
+                      {m.dosageForm} · {m.strength}
+                    </Td>
                     <Td className="text-right">
-                      <span className={`font-mono font-bold ${m.stockOnHand < threshold ? 'text-amber-600' : m.stockOnHand === 0 ? 'text-red-500' : 'text-slate-700'}`}>
+                      <span
+                        className={`font-mono font-bold ${
+                          m.stockOnHand < threshold
+                            ? "text-amber-600"
+                            : m.stockOnHand === 0
+                              ? "text-red-500"
+                              : "text-slate-700"
+                        }`}
+                      >
                         {m.stockOnHand}
                       </span>
                     </Td>
-                    <Td className="text-right font-mono text-sm">{formatPHP(m.unitPrice)}</Td>
-                    <Td className="text-xs text-slate-400">{m.storageLocation}</Td>
+                    <Td className="text-right font-mono text-sm">
+                      {formatPHP(m.unitPrice)}
+                    </Td>
+                    <Td className="text-xs text-slate-400">
+                      {m.storageLocation}
+                    </Td>
                     <Td>
-                      {m.stockOnHand === 0 ? <Badge variant="red">Out of Stock</Badge>
-                        : m.stockOnHand < threshold ? <Badge variant="amber">Low Stock</Badge>
-                          : <Badge variant="green">In Stock</Badge>}
+                      {m.stockOnHand === 0 ? (
+                        <Badge variant="red">Out of Stock</Badge>
+                      ) : m.stockOnHand < threshold ? (
+                        <Badge variant="amber">Low Stock</Badge>
+                      ) : (
+                        <Badge variant="green">In Stock</Badge>
+                      )}
                     </Td>
                   </Tr>
                 ))}
@@ -126,7 +203,9 @@ export default function ReportsInventoryPage() {
             <div className="px-4 py-3 border-b border-slate-200">
               <h2 className="font-semibold text-slate-900 text-sm">
                 Expiring Lots
-                <span className="ml-2 text-slate-400 font-normal">{expiringLots.length} lots</span>
+                <span className="ml-2 text-slate-400 font-normal">
+                  {expiringLots.length} lots
+                </span>
               </h2>
             </div>
             <Table>
@@ -141,28 +220,56 @@ export default function ReportsInventoryPage() {
                 </tr>
               </thead>
               <tbody>
-                {expiringLots.length === 0 && <tr><td colSpan={6}><EmptyState title="No expiring lots found" /></td></tr>}
-                {expiringLots.map(lot => {
-                  const expired = lot.expiresAt < today;
-                  const expiringSoon = !expired && lot.expiresAt <= soonStr;
+                {expiringLots.length === 0 && (
+                  <tr>
+                    <td colSpan={6}>
+                      <EmptyState title="No expiring lots found" />
+                    </td>
+                  </tr>
+                )}
+                {expiringLots.map((lot) => {
+                  const expired = lot.expiresAt < today
+                  const expiringSoon = !expired && lot.expiresAt <= soonStr
                   return (
                     <Tr key={lot.id}>
-                      <Td><span className="font-mono text-xs text-slate-400">{lot.id}</span></Td>
-                      <Td><span className="font-medium text-slate-800">{lot.genericName}</span></Td>
-                      <Td className="text-slate-500">{lot.brandName}</Td>
-                      <Td className="text-right font-mono font-semibold">{lot.quantity}</Td>
                       <Td>
-                        <span className={`font-medium ${expired ? 'text-red-600' : expiringSoon ? 'text-amber-600' : 'text-slate-600'}`}>
+                        <span className="font-mono text-xs text-slate-400">
+                          {lot.id}
+                        </span>
+                      </Td>
+                      <Td>
+                        <span className="font-medium text-slate-800">
+                          {lot.genericName}
+                        </span>
+                      </Td>
+                      <Td className="text-slate-500">{lot.brandName}</Td>
+                      <Td className="text-right font-mono font-semibold">
+                        {lot.quantity}
+                      </Td>
+                      <Td>
+                        <span
+                          className={`font-medium ${
+                            expired
+                              ? "text-red-600"
+                              : expiringSoon
+                                ? "text-amber-600"
+                                : "text-slate-600"
+                          }`}
+                        >
                           {formatDate(lot.expiresAt)}
                         </span>
                       </Td>
                       <Td>
-                        {expired ? <Badge variant="red">Expired</Badge>
-                          : expiringSoon ? <Badge variant="amber">Expiring Soon</Badge>
-                            : <Badge variant="green">Available</Badge>}
+                        {expired ? (
+                          <Badge variant="red">Expired</Badge>
+                        ) : expiringSoon ? (
+                          <Badge variant="amber">Expiring Soon</Badge>
+                        ) : (
+                          <Badge variant="green">Available</Badge>
+                        )}
                       </Td>
                     </Tr>
-                  );
+                  )
                 })}
               </tbody>
             </Table>
@@ -170,5 +277,5 @@ export default function ReportsInventoryPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

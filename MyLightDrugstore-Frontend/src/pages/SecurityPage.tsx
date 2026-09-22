@@ -1,50 +1,66 @@
-import { useState } from 'react';
-import { mockApi } from '../shared/api/client';
-import { MockApiError } from '../shared/api/types';
-import { useSession } from '../shared/SessionContext';
-import { PageHeader, Card, Button, Input, ErrorBanner, showToast } from '../shared/ui';
+import { useState } from "react"
+import { mockApi } from "../shared/api/client"
+import { MockApiError } from "../shared/api/types"
+import { useSession } from "../shared/SessionContext"
+import {
+  PageHeader,
+  Card,
+  Button,
+  Input,
+  ErrorBanner,
+  showToast,
+} from "../shared/ui"
 
 export default function SecurityPage() {
-  const { user } = useSession();
-  const [currentPw, setCurrentPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [confirmPw, setConfirmPw] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
+  const { user } = useSession()
+  const [currentPw, setCurrentPw] = useState("")
+  const [newPw, setNewPw] = useState("")
+  const [confirmPw, setConfirmPw] = useState("")
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errs: Record<string, string> = {};
-    if (!currentPw) errs.currentPw = 'Enter your current password.';
-    if (!newPw || newPw.length < 6) errs.newPw = 'New password must be at least 6 characters.';
-    if (newPw !== confirmPw) errs.confirmPw = 'Passwords do not match.';
-    if (Object.keys(errs).length) { setErrors(errs); return; }
-    setErrors({});
-    setLoading(true);
+    e.preventDefault()
+    const errs: Record<string, string> = {}
+    if (!currentPw) errs.currentPw = "Enter your current password."
+    if (!newPw || newPw.length < 6)
+      errs.newPw = "New password must be at least 6 characters."
+    if (newPw !== confirmPw) errs.confirmPw = "Passwords do not match."
+    if (Object.keys(errs).length) {
+      setErrors(errs)
+      return
+    }
+    setErrors({})
+    setLoading(true)
     try {
-      mockApi.changePassword(currentPw, newPw);
-      showToast('Password changed successfully.');
-      setCurrentPw(''); setNewPw(''); setConfirmPw('');
+      mockApi.changePassword(currentPw, newPw)
+      showToast("Password changed successfully.")
+      setCurrentPw("")
+      setNewPw("")
+      setConfirmPw("")
     } catch (e) {
       if (e instanceof MockApiError) {
         if (e.apiError.details) {
-          const d: Record<string, string> = {};
-          for (const [k, v] of Object.entries(e.apiError.details)) d[k] = v;
-          setErrors(d);
+          const d: Record<string, string> = {}
+          for (const [k, v] of Object.entries(e.apiError.details)) d[k] = v
+          setErrors(d)
         } else {
-          setErrors({ form: e.apiError.message });
+          setErrors({ form: e.apiError.message })
         }
       } else {
-        setErrors({ form: 'Password change failed.' });
+        setErrors({ form: "Password change failed." })
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div>
-      <PageHeader title="Change Password" subtitle="Update your account password" />
+      <PageHeader
+        title="Change Password"
+        subtitle="Update your account password"
+      />
 
       <div className="max-w-sm">
         <Card className="p-6">
@@ -54,18 +70,27 @@ export default function SecurityPage() {
             </div>
             <div>
               <p className="font-medium text-slate-800">{user?.fullName}</p>
-              <p className="text-xs text-slate-400 font-mono">{user?.username}</p>
+              <p className="text-xs text-slate-400 font-mono">
+                {user?.username}
+              </p>
             </div>
           </div>
 
-          {errors.form && <div className="mb-4"><ErrorBanner message={errors.form} onDismiss={() => setErrors({})} /></div>}
+          {errors.form && (
+            <div className="mb-4">
+              <ErrorBanner
+                message={errors.form}
+                onDismiss={() => setErrors({})}
+              />
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Current Password"
               type="password"
               value={currentPw}
-              onChange={e => setCurrentPw(e.target.value)}
+              onChange={(e) => setCurrentPw(e.target.value)}
               error={errors.currentPw || errors.currentPassword}
               autoComplete="current-password"
             />
@@ -73,7 +98,7 @@ export default function SecurityPage() {
               label="New Password"
               type="password"
               value={newPw}
-              onChange={e => setNewPw(e.target.value)}
+              onChange={(e) => setNewPw(e.target.value)}
               error={errors.newPw || errors.newPassword}
               hint="Minimum 6 characters"
               autoComplete="new-password"
@@ -82,7 +107,7 @@ export default function SecurityPage() {
               label="Confirm New Password"
               type="password"
               value={confirmPw}
-              onChange={e => setConfirmPw(e.target.value)}
+              onChange={(e) => setConfirmPw(e.target.value)}
               error={errors.confirmPw}
               autoComplete="new-password"
             />
@@ -93,15 +118,20 @@ export default function SecurityPage() {
         </Card>
 
         <div className="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-4">
-          <h3 className="text-xs font-semibold text-slate-700 mb-2">Password Policy</h3>
+          <h3 className="text-xs font-semibold text-slate-700 mb-2">
+            Password Policy
+          </h3>
           <ul className="text-xs text-slate-500 space-y-1 list-disc list-inside">
             <li>At least 6 characters</li>
             <li>New password must differ from current</li>
             <li>Current password is required for security</li>
-            <li>In demo mode: passwords are stored in browser only and are not real credentials</li>
+            <li>
+              In demo mode: passwords are stored in browser only and are not
+              real credentials
+            </li>
           </ul>
         </div>
       </div>
     </div>
-  );
+  )
 }
