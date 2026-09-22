@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
-import { useSearchParams } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
-import type { Medicine } from "../shared/api/types"
-import { MockApiError } from "../shared/api/types"
+import { useSearchParams } from "@/shared/router-compat"
+import { createInventoryApi } from "@/entities/inventory"
+import { createMedicineApi, type Medicine } from "@/entities/medicine"
+import { createInventoryMutationActions } from "@/features/inventory-mutations"
+import { normalizeApiError } from "@/shared/api"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -13,7 +15,12 @@ import {
   showToast,
   Spinner,
   formatPHP,
-} from "../shared/ui"
+} from "@/shared/ui"
+
+const medicineApi = createMedicineApi(apiClient.transport)
+const inventoryActions = createInventoryMutationActions(
+  createInventoryApi(apiClient.transport),
+)
 
 interface ReceiptLine {
   medicineId: string
@@ -39,10 +46,10 @@ export default function InventoryReceiptsPage() {
   useEffect(() => {
     const loadMedicines = async () => {
       try {
-        const res = await mockApi.listMedicines({ active: true, perPage: 100 })
+        const res = await medicineApi.list({ active: true, perPage: 100 })
         setMedicines(res.data)
-      } catch {
-        /* ignore */
+      } catch (cause: unknown) {
+        setError(normalizeApiError(cause).message)
       }
     }
 
@@ -80,27 +87,26 @@ export default function InventoryReceiptsPage() {
     }
     setLoading(true)
     try {
-      await mockApi.receiveStock({
+      await inventoryActions.receive({
         receivedAt: new Date(receivedAt).toISOString(),
         items: lines.map((l) => ({
-          medicineId: l.medicineId,
+          medicineId: Number(l.medicineId),
           quantity: l.quantity,
           expiresAt: l.expiresAt,
         })),
-        idempotencyKey: `receipt_${Date.now()}`,
       })
       showToast("Stock received successfully.")
       setSuccess(true)
       setLines([{ medicineId: "", quantity: 1, expiresAt: "" }])
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
-      else setError("Failed to receive stock.")
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setLoading(false)
     }
   }
 
-  const getMed = (id: string) => medicines.find((m) => m.id === id)
+  const getMed = (id: string) =>
+    medicines.find((medicine) => String(medicine.id) === id)
 
   return (
     <div>

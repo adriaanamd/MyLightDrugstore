@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react"
-import { mockApi } from "../shared/api/client"
-import type { Movement } from "../shared/api/types"
+import {
+  createInventoryApi,
+  type InventoryMovement,
+  type MovementType,
+} from "@/entities/inventory"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Card,
@@ -15,27 +19,29 @@ import {
   EmptyState,
   Spinner,
   formatDateTime,
-} from "../shared/ui"
+} from "@/shared/ui"
+
+const inventoryApi = createInventoryApi(apiClient.transport)
 
 const movementLabels: Record<string, string> = {
   receipt: "Receipt",
   sale: "Sale",
   adjustment: "Adjustment",
-  sale_removal: "Sale Removal",
-  cancellation: "Cancellation",
+  sale_item_removal: "Sale Removal",
+  sale_cancellation: "Cancellation",
 }
 
 function movementBadge(type: string) {
   if (type === "receipt") return <Badge variant="teal">Receipt</Badge>
   if (type === "sale") return <Badge variant="navy">Sale</Badge>
   if (type === "adjustment") return <Badge variant="amber">Adjustment</Badge>
-  if (type === "sale_removal" || type === "cancellation")
+  if (type === "sale_item_removal" || type === "sale_cancellation")
     return <Badge variant="gray">Reversal</Badge>
   return <Badge variant="gray">{type}</Badge>
 }
 
 export default function InventoryMovementsPage() {
-  const [movements, setMovements] = useState<Movement[]>([])
+  const [movements, setMovements] = useState<InventoryMovement[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [typeFilter, setTypeFilter] = useState("")
@@ -46,8 +52,8 @@ export default function InventoryMovementsPage() {
     const loadMovements = async () => {
       setLoading(true)
       try {
-        const result = await mockApi.listMovements({
-          type: typeFilter || undefined,
+        const result = await inventoryApi.movements({
+          movementType: (typeFilter || undefined) as MovementType | undefined,
           page,
           perPage: 25,
         })
@@ -57,15 +63,15 @@ export default function InventoryMovementsPage() {
           data = data.filter(
             (m) =>
               m.genericName.toLowerCase().includes(lq) ||
-              m.medicineId.includes(lq) ||
-              m.actorName.toLowerCase().includes(lq) ||
-              m.lotId.includes(lq),
+              String(m.medicineId).includes(lq) ||
+              m.actorFullName.toLowerCase().includes(lq) ||
+              String(m.lotId).includes(lq),
           )
         }
         setMovements(data)
         setTotal(result.meta.total)
       } catch {
-        /* ignore */
+        setMovements([])
       } finally {
         setLoading(false)
       }
@@ -131,11 +137,11 @@ export default function InventoryMovementsPage() {
                   </tr>
                 )}
                 {movements.map((mv) => (
-                  <Tr key={mv.id}>
+                  <Tr key={mv.movementId}>
                     <Td className="text-xs text-slate-500 whitespace-nowrap">
-                      {formatDateTime(mv.createdAt)}
+                      {formatDateTime(mv.occurredAt)}
                     </Td>
-                    <Td>{movementBadge(mv.type)}</Td>
+                    <Td>{movementBadge(mv.movementType)}</Td>
                     <Td>
                       <span className="font-medium text-slate-800">
                         {mv.genericName}
@@ -163,10 +169,12 @@ export default function InventoryMovementsPage() {
                     </Td>
                     <Td>
                       <span className="font-mono text-xs text-slate-400">
-                        {mv.referenceId ?? "—"}
+                        {mv.sourceId ?? "—"}
                       </span>
                     </Td>
-                    <Td className="text-xs text-slate-600">{mv.actorName}</Td>
+                    <Td className="text-xs text-slate-600">
+                      {mv.actorFullName}
+                    </Td>
                   </Tr>
                 ))}
               </tbody>

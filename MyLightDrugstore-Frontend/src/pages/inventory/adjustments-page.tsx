@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
-import { mockApi } from "../shared/api/client"
-import { MockApiError } from "../shared/api/types"
+import { createInventoryApi, type InventoryLot } from "@/entities/inventory"
+import { createInventoryMutationActions } from "@/features/inventory-mutations"
+import { normalizeApiError } from "@/shared/api"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -11,10 +13,13 @@ import {
   showToast,
   Spinner,
   formatDate,
-} from "../shared/ui"
+} from "@/shared/ui"
+
+const inventoryApi = createInventoryApi(apiClient.transport)
+const inventoryActions = createInventoryMutationActions(inventoryApi)
 
 type Reason = "stock_count" | "damage" | "expiry" | "correction"
-type EnrichedLot = Awaited<ReturnType<typeof mockApi.listLots>>[number]
+type EnrichedLot = InventoryLot
 
 interface AdjLine {
   lotId: string
@@ -38,15 +43,16 @@ export default function InventoryAdjustmentsPage() {
   useEffect(() => {
     const loadLots = async () => {
       try {
-        setLots(await mockApi.listLots({ available: true }))
-      } catch {
-        /* ignore */
+        const result = await inventoryApi.lots({ available: true })
+        setLots(result.data)
+      } catch (cause: unknown) {
+        setError(normalizeApiError(cause).message)
       }
     }
     void loadLots()
   }, [])
 
-  const getLot = (id: string) => lots.find((l) => l.id === id)
+  const getLot = (id: string) => lots.find((lot) => String(lot.lotId) === id)
   const addLine = () => setLines((l) => [...l, { lotId: "", delta: 0 }])
   const removeLine = (i: number) =>
     setLines((l) => l.filter((_, idx) => idx !== i))
@@ -67,25 +73,28 @@ export default function InventoryAdjustmentsPage() {
         return
       }
       const lot = getLot(l.lotId)
-      if (lot && lot.quantity + l.delta < 0) {
+      if (lot && lot.quantityRemaining + l.delta < 0) {
         setError(
-          `Adjustment for lot ${l.lotId} would result in negative quantity (current: ${lot.quantity}, delta: ${l.delta}).`,
+          `Adjustment for lot ${l.lotId} would result in negative quantity (current: ${lot.quantityRemaining}, delta: ${l.delta}).`,
         )
         return
       }
     }
     setLoading(true)
     try {
-      await mockApi.recordAdjustment({
+      await inventoryActions.adjust({
         reason,
-        items: lines.map((l) => ({ lotId: l.lotId, quantityDelta: l.delta })),
+        items: lines.map((l) => ({
+          lotId: Number(l.lotId),
+          quantityDelta: l.delta,
+        })),
       })
       showToast("Adjustment recorded successfully.")
       setLines([{ lotId: "", delta: 0 }])
-      setLots(await mockApi.listLots({ available: true }))
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
-      else setError("Failed to record adjustment.")
+      const result = await inventoryApi.lots({ available: true })
+      setLots(result.data)
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setLoading(false)
     }
@@ -130,7 +139,7 @@ export default function InventoryAdjustmentsPage() {
 
             {lines.map((line, i) => {
               const lot = getLot(line.lotId)
-              const newQty = lot ? lot.quantity + line.delta : null
+              const newQty = lot ? lot.quantityRemaining + line.delta : null
               const invalid = newQty !== null && newQty < 0
               return (
                 <div
@@ -144,15 +153,16 @@ export default function InventoryAdjustmentsPage() {
                     >
                       <option value="">Select lot...</option>
                       {lots.map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.genericName} ({l.brandName}) · Lot {l.id} · Exp{" "}
-                          {formatDate(l.expiresAt)} · {l.quantity} units
+                        <option key={l.lotId} value={l.lotId}>
+                          {l.genericName} ({l.brandName}) · Lot {l.lotId} · Exp{" "}
+                          {formatDate(l.expiresAt)} · {l.quantityRemaining}{" "}
+                          units
                         </option>
                       ))}
                     </Select>
                     {lot && (
                       <p className="text-[10px] text-slate-400 mt-1">
-                        Current: {lot.quantity} → New:{" "}
+                        Current: {lot.quantityRemaining} → New:{" "}
                         <span
                           className={
                             invalid

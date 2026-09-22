@@ -11,6 +11,7 @@ export type {
   InventoryLotParams,
   InventoryMovement,
   InventoryMovementParams,
+  MovementType,
   InventoryReceiptItem,
   InventoryReceiptPayload,
   InventoryReceiptResult,

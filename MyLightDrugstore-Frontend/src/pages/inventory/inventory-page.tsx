@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { Link } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
+import { Link } from "@/shared/router-compat"
+import { createInventoryApi, type InventoryLot } from "@/entities/inventory"
+import { apiClient } from "@/shared/api/api-client"
 import {
   StatCard,
   Card,
@@ -14,15 +15,26 @@ import {
   EmptyState,
   Spinner,
   formatDate,
-} from "../shared/ui"
+} from "@/shared/ui"
 
-type EnrichedLot = Awaited<ReturnType<typeof mockApi.listLots>>[number]
+const inventoryApi = createInventoryApi(apiClient.transport)
+
+type InventoryOverview = {
+  medicineCount: number
+
+  totalStockUnits: number
+
+  lowStockCount: number
+
+  expiringSoonCount: number
+
+  expiredLotsCount: number
+}
+
+type EnrichedLot = InventoryLot
 
 export default function InventoryPage() {
-  const [overview, setOverview] =
-    useState<Awaited<ReturnType<typeof mockApi.getInventoryOverview>> | null>(
-      null,
-    )
+  const [overview, setOverview] = useState<InventoryOverview | null>(null)
   const [lots, setLots] = useState<EnrichedLot[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<"all" | "low" | "expiring" | "expired">("all")
@@ -30,14 +42,28 @@ export default function InventoryPage() {
   useEffect(() => {
     const loadInventory = async () => {
       try {
-        const [inventoryOverview, inventoryLots] = await Promise.all([
-          mockApi.getInventoryOverview(),
-          mockApi.listLots({}),
+        const [inventorySummary, inventoryLots] = await Promise.all([
+          inventoryApi.summary({ perPage: 100 }),
+          inventoryApi.lots({}),
         ])
-        setOverview(inventoryOverview)
-        setLots(inventoryLots)
+        setOverview({
+          medicineCount: inventorySummary.meta.total,
+          totalStockUnits: inventorySummary.data.reduce(
+            (total, item) => total + item.stockOnHand,
+            0,
+          ),
+          lowStockCount: inventorySummary.data.filter((item) => item.lowStock)
+            .length,
+          expiringSoonCount: inventorySummary.data.filter(
+            (item) => item.earliestExpiry !== null,
+          ).length,
+          expiredLotsCount: inventoryLots.data.filter(
+            (lot) => lot.expiresAt < new Date().toISOString().split("T")[0],
+          ).length,
+        })
+        setLots(inventoryLots.data)
       } catch {
-        /* ignore */
+        setLots([])
       } finally {
         setLoading(false)
       }
@@ -55,7 +81,8 @@ export default function InventoryPage() {
 
   const stockMap: Record<string, number> = {}
   lots.forEach((lot) => {
-    stockMap[lot.medicineId] = (stockMap[lot.medicineId] ?? 0) + lot.quantity
+    stockMap[lot.medicineId] =
+      (stockMap[lot.medicineId] ?? 0) + lot.quantityRemaining
   })
 
   const filteredLots = lots.filter((l) => {
@@ -64,16 +91,19 @@ export default function InventoryPage() {
       return stock < threshold
     }
     if (tab === "expiring")
-      return l.expiresAt >= today && l.expiresAt <= soon && l.quantity > 0
+      return (
+        l.expiresAt >= today && l.expiresAt <= soon && l.quantityRemaining > 0
+      )
     if (tab === "expired") return l.expiresAt < today
     return true
   })
 
   function lotBadge(lot: EnrichedLot) {
     if (lot.expiresAt < today) return <Badge variant="red">Expired</Badge>
-    if (lot.expiresAt <= soon && lot.quantity > 0)
+    if (lot.expiresAt <= soon && lot.quantityRemaining > 0)
       return <Badge variant="amber">Expiring Soon</Badge>
-    if (lot.quantity === 0) return <Badge variant="gray">Depleted</Badge>
+    if (lot.quantityRemaining === 0)
+      return <Badge variant="gray">Depleted</Badge>
     return <Badge variant="green">Available</Badge>
   }
 
@@ -180,10 +210,10 @@ export default function InventoryPage() {
               </tr>
             )}
             {filteredLots.map((lot) => (
-              <Tr key={lot.id}>
+              <Tr key={lot.lotId}>
                 <Td>
                   <span className="font-mono text-xs text-slate-400">
-                    {lot.id}
+                    {lot.lotId}
                   </span>
                 </Td>
                 <Td>
@@ -193,12 +223,12 @@ export default function InventoryPage() {
                 </Td>
                 <Td className="text-slate-500 text-xs">{lot.brandName}</Td>
                 <Td className="text-right font-mono text-slate-500 text-sm">
-                  {lot.initialQuantity}
+                  {lot.quantityReceived}
                 </Td>
                 <Td className="text-right">
                   <span
                     className={`font-mono font-semibold text-sm ${
-                      lot.quantity === 0
+                      lot.quantityRemaining === 0
                         ? "text-slate-300"
                         : lot.expiresAt < today
                           ? "text-red-500"
@@ -207,7 +237,7 @@ export default function InventoryPage() {
                             : "text-slate-700"
                     }`}
                   >
-                    {lot.quantity}
+                    {lot.quantityRemaining}
                   </span>
                 </Td>
                 <Td>
