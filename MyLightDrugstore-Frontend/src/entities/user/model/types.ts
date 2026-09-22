@@ -38,6 +38,14 @@ export type UserUpdatePayload = {
   active?: boolean
 }
 
+export type UserListParams = {
+  active?: boolean
+
+  page?: number
+
+  perPage?: number
+}
+
 export type UserWritePayload = UserUpdatePayload
 
 export type UserPage = Page<User>

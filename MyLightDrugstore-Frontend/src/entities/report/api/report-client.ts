@@ -1,45 +1,131 @@
-import type { TransportClient } from "@/shared/api"
+import { type TransportClient, TransportRequestError } from "@/shared/api"
+import { readPageMeta, unwrapData, withQuery } from "@/shared/api/query"
 
 import type {
-  InventoryReportResponse,
+  InventoryReport,
+  InventoryReportRow,
   ReportFilters,
-  SalesReportResponse,
+  SalesReport,
 } from "../model/types"
 
 export function createReportApi(client: Pick<TransportClient, "request">) {
   return {
-    inventory(filters: ReportFilters = {}) {
-      return client.request<InventoryReportResponse>(
-        withQuery("/reports/inventory", filters),
-
-        {
-          method: "GET",
-        },
+    async inventory(filters: ReportFilters = {}): Promise<InventoryReport> {
+      const response = await client.request<unknown>(
+        withQuery("/reports/inventory", {
+          lowStock: filters.lowStock,
+          expiresBefore: filters.expiresBefore,
+          page: filters.page,
+          perPage: filters.perPage,
+        }),
+        { method: "GET" },
       )
+
+      return readInventoryReport(response.data)
     },
 
-    sales(filters: ReportFilters = {}) {
-      return client.request<SalesReportResponse>(
-        withQuery("/reports/sales", filters),
-
-        {
-          method: "GET",
-        },
+    async sales(filters: ReportFilters = {}): Promise<SalesReport> {
+      const response = await client.request<unknown>(
+        withQuery("/reports/sales", {
+          from: filters.from,
+          to: filters.to,
+        }),
+        { method: "GET" },
       )
+
+      return readSalesReport(unwrapData(response.data))
     },
   }
 }
 
-function withQuery(path: string, filters: ReportFilters): string {
-  const query = new URLSearchParams()
+function readInventoryReport(value: unknown): InventoryReport {
+  if (!isRecord(value) || !Array.isArray(value.data)) {
+    throw invalidResponse("inventory report")
+  }
 
-  if (filters.from) query.set("from", filters.from)
+  return {
+    rows: value.data.map(readInventoryReportRow),
+    total: readPageMeta(value, value.data.length).total,
+  }
+}
 
-  if (filters.to) query.set("to", filters.to)
+function readInventoryReportRow(value: unknown): InventoryReportRow {
+  if (!isRecord(value)) {
+    throw invalidResponse("inventory report row")
+  }
 
-  if (filters.status) query.set("status", filters.status)
+  return {
+    medicineId: readNumber(value.medicineId, "medicineId"),
+    genericName: readString(value.genericName, "genericName"),
+    brandName: readNullableString(value.brandName, "brandName"),
+    dosageForm: readString(value.dosageForm, "dosageForm"),
+    strength: readNullableString(value.strength, "strength"),
+    unitPrice: readString(value.unitPrice, "unitPrice"),
+    stockOnHand: readNumber(value.stockOnHand, "stockOnHand"),
+    lowStock: readBoolean(value.lowStock, "lowStock"),
+    earliestExpiry: readNullableString(value.earliestExpiry, "earliestExpiry"),
+  }
+}
 
-  const encoded = query.toString()
+function readSalesReport(value: unknown): SalesReport {
+  if (!isRecord(value)) {
+    throw invalidResponse("sales report")
+  }
 
-  return encoded ? `${path}?${encoded}` : path
+  return {
+    from: readNullableString(value.from, "from"),
+    to: readNullableString(value.to, "to"),
+    saleCount: readNumber(value.saleCount, "saleCount"),
+    grossSales: readString(value.grossSales, "grossSales"),
+    paidSaleCount: readNumber(value.paidSaleCount, "paidSaleCount"),
+    paidGrossSales: readString(value.paidGrossSales, "paidGrossSales"),
+    cancelledSaleCount: readNumber(
+      value.cancelledSaleCount,
+      "cancelledSaleCount",
+    ),
+  }
+}
+
+function readString(value: unknown, field: string): string {
+  if (typeof value !== "string") {
+    throw invalidResponse(`report.${field}`)
+  }
+
+  return value
+}
+
+function readNullableString(value: unknown, field: string): string | null {
+  if (value !== null && typeof value !== "string") {
+    throw invalidResponse(`report.${field}`)
+  }
+
+  return value
+}
+
+function readNumber(value: unknown, field: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw invalidResponse(`report.${field}`)
+  }
+
+  return value
+}
+
+function readBoolean(value: unknown, field: string): boolean {
+  if (typeof value !== "boolean") {
+    throw invalidResponse(`report.${field}`)
+  }
+
+  return value
+}
+
+function invalidResponse(resource: string): TransportRequestError {
+  return new TransportRequestError(
+    `The ${resource} response is invalid.`,
+    0,
+    "transport_error",
+  )
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
