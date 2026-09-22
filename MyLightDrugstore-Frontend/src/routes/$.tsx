@@ -13,11 +13,11 @@ import SalesNewPage from "@/pages/sales/new-sale-page"
 import SalesCartPage from "@/pages/sales/cart-page"
 import SalesListPage from "@/pages/sales/sales-list-page"
 import SalesPrintPage from "@/pages/sales/sales-print-page"
-import ReportsInventoryPage from "@/pages/ReportsInventoryPage"
-import ReportsSalesPage from "@/pages/ReportsSalesPage"
-import AdminUsersPage from "@/pages/AdminUsersPage"
-import SecurityPage from "@/pages/SecurityPage"
-import BackupsPage from "@/pages/BackupsPage"
+import ReportsInventoryPage from "@/pages/reports/inventory-report-page"
+import ReportsSalesPage from "@/pages/reports/sales-report-page"
+import AdminUsersPage from "@/pages/administration/staff-accounts-page"
+import SecurityPage from "@/pages/security/security-page"
+import BackupsPage from "@/pages/backups/backups-page"
 
 export const Route = createFileRoute("/$")({ component: Surface })
 

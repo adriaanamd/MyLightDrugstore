@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react"
-import { mockApi } from "../shared/api/client"
-import type { User, Role } from "../shared/api/types"
-import { MockApiError } from "../shared/api/types"
+import { createUserApi, type User, type UserRole } from "@/entities/user"
+import { createStaffActions } from "@/features/staff-management"
+import { useAuthSession } from "@/features/auth"
+import { normalizeApiError } from "@/shared/api"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -19,14 +21,15 @@ import {
   showToast,
   formatDate,
   EmptyState,
-} from "../shared/ui"
-import { useSession } from "../shared/SessionContext"
+} from "@/shared/ui"
+
+const userApi = createUserApi(apiClient.transport)
 
 interface UserForm {
   username: string
   fullName: string
   password: string
-  role: Role
+  role: UserRole
 }
 const emptyForm: UserForm = {
   username: "",
@@ -36,7 +39,8 @@ const emptyForm: UserForm = {
 }
 
 export default function AdminUsersPage() {
-  const { user: me } = useSession()
+  const { user: me } = useAuthSession()
+  const staffActions = createStaffActions(userApi, me?.role ?? "staff")
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -50,7 +54,8 @@ export default function AdminUsersPage() {
   const load = async () => {
     setLoading(true)
     try {
-      setUsers(await mockApi.listUsers())
+      const result = await userApi.list({ perPage: 100 })
+      setUsers(result.data)
     } catch {
       /* ignore */
     } finally {
@@ -99,20 +104,19 @@ export default function AdminUsersPage() {
     setFormLoading(true)
     try {
       if (editUser) {
-        await mockApi.updateUser(editUser.id, {
+        await staffActions.update(editUser.id, {
           fullName: form.fullName,
           role: form.role,
         })
         showToast("Account updated.")
       } else {
-        await mockApi.createUser(form)
+        await staffActions.create(form)
         showToast("Account created.")
       }
       setShowForm(false)
       await load()
-    } catch (e) {
-      if (e instanceof MockApiError) setFormError(e.apiError.message)
-      else setFormError("Save failed.")
+    } catch (cause: unknown) {
+      setFormError(normalizeApiError(cause).message)
     } finally {
       setFormLoading(false)
     }
@@ -122,12 +126,12 @@ export default function AdminUsersPage() {
     if (!deactivateUser) return
     setDeactivateLoading(true)
     try {
-      await mockApi.updateUser(deactivateUser.id, { active: false })
+      await staffActions.deactivate(deactivateUser.id)
       showToast(`${deactivateUser.fullName} deactivated.`)
       setDeactivateUser(null)
       await load()
-    } catch (e) {
-      if (e instanceof MockApiError) showToast(e.apiError.message, "error")
+    } catch (cause: unknown) {
+      showToast(normalizeApiError(cause).message, "error")
     } finally {
       setDeactivateLoading(false)
     }
@@ -284,7 +288,7 @@ export default function AdminUsersPage() {
             label="Role"
             value={form.role}
             onChange={(e) =>
-              setForm((f) => ({ ...f, role: e.target.value as Role }))
+              setForm((f) => ({ ...f, role: e.target.value as UserRole }))
             }
           >
             <option value="staff">Staff</option>

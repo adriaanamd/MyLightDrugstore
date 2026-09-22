@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react"
-import { mockApi } from "../shared/api/client"
+import { createReportApi, type SalesReport } from "@/entities/report"
+import { createSaleApi, type Sale } from "@/entities/sale"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -14,8 +16,52 @@ import {
   formatDateTime,
   StatCard,
   EmptyState,
-} from "../shared/ui"
-import type { Sale } from "../shared/api/types"
+} from "@/shared/ui"
+
+const reportApi = createReportApi(apiClient.transport)
+const saleApi = createSaleApi(apiClient.transport)
+
+type MedicineSales = {
+  medicineId: number
+  genericName: string
+  brandName: string | null | undefined
+  unitsSold: number
+  saleCount: number
+  gross: string
+}
+
+type SalesReportView = SalesReport & {
+  byMedicine: MedicineSales[]
+  sales: Sale[]
+  totalGross: string
+}
+
+function buildMedicineSales(sales: Sale[]): MedicineSales[] {
+  const totals = new Map<number, MedicineSales>()
+
+  for (const sale of sales) {
+    for (const item of sale.items ?? []) {
+      if (item.state !== "active") continue
+      const existing = totals.get(item.medicineId)
+      const current = existing ?? {
+        medicineId: item.medicineId,
+        genericName: item.genericName ?? `Medicine ${item.medicineId}`,
+        brandName: item.brandName,
+        unitsSold: 0,
+        saleCount: 0,
+        gross: "0.00",
+      }
+      current.unitsSold += item.quantity
+      current.saleCount += 1
+      current.gross = (Number(current.gross) + Number(item.lineTotal)).toFixed(
+        2,
+      )
+      totals.set(item.medicineId, current)
+    }
+  }
+
+  return [...totals.values()]
+}
 
 export default function ReportsSalesPage() {
   const today = new Date().toISOString().split("T")[0]
@@ -25,13 +71,25 @@ export default function ReportsSalesPage() {
 
   const [fromDate, setFromDate] = useState(weekAgoStr)
   const [toDate, setToDate] = useState(today)
-  const [report, setReport] =
-    useState<Awaited<ReturnType<typeof mockApi.getSalesReport>> | null>(null)
+  const [report, setReport] = useState<SalesReportView | null>(null)
 
   const load = async () => {
     try {
-      const r = await mockApi.getSalesReport({ from: fromDate, to: toDate })
-      setReport(r)
+      const [summary, salesPage] = await Promise.all([
+        reportApi.sales({ from: fromDate, to: toDate }),
+        saleApi.list({
+          from: fromDate,
+          to: toDate,
+          state: "completed",
+          perPage: 100,
+        }),
+      ])
+      setReport({
+        ...summary,
+        byMedicine: buildMedicineSales(salesPage.data),
+        sales: salesPage.data,
+        totalGross: summary.grossSales,
+      })
     } catch {
       /* ignore */
     }
@@ -196,7 +254,10 @@ export default function ReportsSalesPage() {
                       <Td className="text-xs text-slate-600">
                         {sale.createdByName}
                       </Td>
-                      <Td>{sale.items.filter((i) => !i.removed).length}</Td>
+                      <Td>
+                        {sale.items?.filter((item) => item.state === "active")
+                          .length ?? 0}
+                      </Td>
                       <Td className="text-right font-mono font-semibold">
                         {formatPHP(sale.grandTotal)}
                       </Td>

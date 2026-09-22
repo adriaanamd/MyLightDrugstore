@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { mockApi } from "../shared/api/client"
-import type { Medicine } from "../shared/api/types"
+import { createInventoryApi, type InventoryLot } from "@/entities/inventory"
+import { createMedicineApi, type Medicine } from "@/entities/medicine"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -14,9 +15,12 @@ import {
   formatPHP,
   formatDate,
   EmptyState,
-} from "../shared/ui"
+} from "@/shared/ui"
 
-type EnrichedLot = Awaited<ReturnType<typeof mockApi.listLots>>[number]
+const inventoryApi = createInventoryApi(apiClient.transport)
+const medicineApi = createMedicineApi(apiClient.transport)
+
+type EnrichedLot = InventoryLot
 
 export default function ReportsInventoryPage() {
   const [medicines, setMedicines] = useState<Medicine[]>([])
@@ -27,13 +31,21 @@ export default function ReportsInventoryPage() {
 
   const load = async () => {
     try {
-      const result = await mockApi.getInventoryReport({
-        lowStock: tab === "low",
-        expiresBefore: expiresBefore || undefined,
-      })
-      setMedicines(result.medicines)
-      setExpiringLots(result.expiringLots)
-      setThreshold(result.threshold)
+      const [medicineResult, lotResult] = await Promise.all([
+        medicineApi.list({
+          active: true,
+          lowStock: tab === "low" ? true : undefined,
+          perPage: 100,
+        }),
+        inventoryApi.lots({
+          available: true,
+          expiresBefore: expiresBefore || undefined,
+          perPage: 100,
+        }),
+      ])
+      setMedicines(medicineResult.data)
+      setExpiringLots(lotResult.data)
+      setThreshold(30)
     } catch {
       /* ignore */
     }
@@ -231,10 +243,10 @@ export default function ReportsInventoryPage() {
                   const expired = lot.expiresAt < today
                   const expiringSoon = !expired && lot.expiresAt <= soonStr
                   return (
-                    <Tr key={lot.id}>
+                    <Tr key={lot.lotId}>
                       <Td>
                         <span className="font-mono text-xs text-slate-400">
-                          {lot.id}
+                          {lot.lotId}
                         </span>
                       </Td>
                       <Td>
@@ -244,7 +256,7 @@ export default function ReportsInventoryPage() {
                       </Td>
                       <Td className="text-slate-500">{lot.brandName}</Td>
                       <Td className="text-right font-mono font-semibold">
-                        {lot.quantity}
+                        {lot.quantityRemaining}
                       </Td>
                       <Td>
                         <span

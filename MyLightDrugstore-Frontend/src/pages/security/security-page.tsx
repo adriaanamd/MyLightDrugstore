@@ -1,7 +1,10 @@
 import { useState } from "react"
-import { mockApi } from "../shared/api/client"
-import { MockApiError } from "../shared/api/types"
-import { useSession } from "../shared/SessionContext"
+import { useAuthSession } from "@/features/auth"
+import {
+  useChangePassword,
+  validatePasswordChange,
+} from "@/features/password-change"
+import { normalizeApiError } from "@/shared/api"
 import {
   PageHeader,
   Card,
@@ -9,47 +12,46 @@ import {
   Input,
   ErrorBanner,
   showToast,
-} from "../shared/ui"
+} from "@/shared/ui"
 
 export default function SecurityPage() {
-  const { user } = useSession()
+  const { user } = useAuthSession()
+  const { execute } = useChangePassword()
   const [currentPw, setCurrentPw] = useState("")
   const [newPw, setNewPw] = useState("")
   const [confirmPw, setConfirmPw] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const errs: Record<string, string> = {}
-    if (!currentPw) errs.currentPw = "Enter your current password."
-    if (!newPw || newPw.length < 6)
-      errs.newPw = "New password must be at least 6 characters."
-    if (newPw !== confirmPw) errs.confirmPw = "Passwords do not match."
-    if (Object.keys(errs).length) {
-      setErrors(errs)
+    const validation = validatePasswordChange({
+      currentPassword: currentPw,
+      newPassword: newPw,
+      confirmPassword: confirmPw,
+    })
+    if (!validation.valid) {
+      setErrors({
+        currentPw: validation.errors.currentPassword ?? "",
+        newPw: validation.errors.newPassword ?? "",
+        confirmPw: validation.errors.confirmPassword ?? "",
+      })
       return
     }
     setErrors({})
     setLoading(true)
     try {
-      mockApi.changePassword(currentPw, newPw)
+      await execute({
+        currentPassword: currentPw,
+        newPassword: newPw,
+        confirmPassword: confirmPw,
+      })
       showToast("Password changed successfully.")
       setCurrentPw("")
       setNewPw("")
       setConfirmPw("")
-    } catch (e) {
-      if (e instanceof MockApiError) {
-        if (e.apiError.details) {
-          const d: Record<string, string> = {}
-          for (const [k, v] of Object.entries(e.apiError.details)) d[k] = v
-          setErrors(d)
-        } else {
-          setErrors({ form: e.apiError.message })
-        }
-      } else {
-        setErrors({ form: "Password change failed." })
-      }
+    } catch (cause: unknown) {
+      setErrors({ form: normalizeApiError(cause).message })
     } finally {
       setLoading(false)
     }
