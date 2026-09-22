@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useSearchParams } from "@/shared/router-compat"
+import { useRouterState } from "@tanstack/react-router"
 import { createInventoryApi } from "@/entities/inventory"
 import { createMedicineApi, type Medicine } from "@/entities/medicine"
 import { createInventoryMutationActions } from "@/features/inventory-mutations"
@@ -29,7 +29,8 @@ interface ReceiptLine {
 }
 
 export default function InventoryReceiptsPage() {
-  const [searchParams] = useSearchParams()
+  const href = useRouterState({ select: (state) => state.location.href })
+  const searchParams = new URL(href, window.location.origin).searchParams
   const prefillMedId = searchParams.get("medicineId")
 
   const [medicines, setMedicines] = useState<Medicine[]>([])

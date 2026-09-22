@@ -1,5 +1,5 @@
 import { createFileRoute, useRouterState } from "@tanstack/react-router"
-import { Navigate } from "@/shared/router-compat"
+import { Navigate } from "@tanstack/react-router"
 import { useSession } from "@/shared/SessionContext"
 import AppShell from "@/widgets/AppShell"
 import LoginPage from "@/pages/login/login-page"
@@ -102,7 +102,7 @@ function Surface() {
         <AdminUsersPage />
       </AppShell>
     ) : (
-      <Navigate to="/dashboard" replace />
+      <Navigate to={"/dashboard" as never} replace />
     )
   if (pathname === "/backups")
     return user.role === "admin" ? (
@@ -110,7 +110,7 @@ function Surface() {
         <BackupsPage />
       </AppShell>
     ) : (
-      <Navigate to="/dashboard" replace />
+      <Navigate to={"/dashboard" as never} replace />
     )
   return (
     <AppShell>

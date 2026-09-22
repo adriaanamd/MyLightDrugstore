@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate, Link } from "@/shared/router-compat"
+import { Link } from "@tanstack/react-router"
 import { createSaleApi, type Sale, type SaleItem } from "@/entities/sale"
 import { createSalesCartActions } from "@/features/sales-cart"
 import { normalizeApiError } from "@/shared/api"
@@ -27,7 +27,6 @@ const saleApi = createSaleApi(apiClient.transport)
 const salesCartActions = createSalesCartActions(saleApi)
 
 export default function SalesCartPage() {
-  const navigate = useNavigate()
   const [sale, setSale] = useState<Sale | null>(null)
   const [error, setError] = useState("")
 
@@ -115,7 +114,7 @@ export default function SalesCartPage() {
               <p className="text-sm text-slate-500 mb-4">
                 This sale has been {sale.state}.
               </p>
-              <Link to="/sales/new">
+              <Link to={"/sales/new" as never}>
                 <Button>Start New Sale</Button>
               </Link>
             </div>
@@ -124,7 +123,7 @@ export default function SalesCartPage() {
               title="No open sale"
               description="Start a new sale to add items to the cart."
               action={
-                <Link to="/sales/new">
+                <Link to={"/sales/new" as never}>
                   <Button>New Sale</Button>
                 </Link>
               }
@@ -146,12 +145,12 @@ export default function SalesCartPage() {
         subtitle={`Sale ${sale.id} · Started ${formatDateTime(sale.createdAt)}`}
         action={
           <div className="flex gap-2">
-            <Link to="/sales/new">
+            <Link to={"/sales/new" as never}>
               <Button variant="outline" size="sm">
                 + Add Item
               </Button>
             </Link>
-            <Link to={`/sales/print/${sale.id}`} target="_blank">
+            <Link to={`/sales/print/${sale.id}` as never} target="_blank">
               <Button variant="ghost" size="sm">
                 🖨 Print Order
               </Button>
@@ -207,7 +206,7 @@ export default function SalesCartPage() {
                     >
                       Cart is empty —{" "}
                       <Link
-                        to="/sales/new"
+                        to={"/sales/new" as never}
                         className="text-teal-600 hover:underline"
                       >
                         add items
@@ -302,13 +301,13 @@ export default function SalesCartPage() {
               >
                 ✓ Mark Paid
               </Button>
-              <Link to="/sales/new" className="block">
+              <Link to={"/sales/new" as never} className="block">
                 <Button variant="outline" className="w-full">
                   + Add Another Item
                 </Button>
               </Link>
               <Link
-                to={`/sales/print/${sale.id}`}
+                to={`/sales/print/${sale.id}` as never}
                 target="_blank"
                 className="block"
               >

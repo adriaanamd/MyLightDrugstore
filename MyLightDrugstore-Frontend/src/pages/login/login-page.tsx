@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Navigate, useNavigate } from "@/shared/router-compat"
+import { Navigate, useNavigate } from "@tanstack/react-router"
 import { useAuthSession } from "@/features/auth"
 import { normalizeApiError } from "@/shared/api"
 import { Button, ErrorBanner, Input } from "@/shared/ui"
@@ -12,14 +12,14 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user) return <Navigate to={"/dashboard" as never} replace />
 
   const handleLogin = async (u: string, p: string) => {
     setLoading(true)
     setError("")
     try {
       await login({ username: u, password: p })
-      navigate("/dashboard")
+      void navigate({ to: "/dashboard" as never })
     } catch (cause: unknown) {
       setError(normalizeApiError(cause).message)
     } finally {

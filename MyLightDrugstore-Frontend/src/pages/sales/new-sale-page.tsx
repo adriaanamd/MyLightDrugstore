@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "@/shared/router-compat"
+import { useNavigate } from "@tanstack/react-router"
 import { createMedicineApi, type Medicine } from "@/entities/medicine"
 import { createSaleApi } from "@/entities/sale"
 import { createSalesEntryActions } from "@/features/sales-entry"
@@ -113,7 +113,7 @@ export default function SalesNewPage() {
         })
         showToast(`Sale created with ${selectedMed.genericName}.`)
       }
-      navigate("/sales/cart")
+      void navigate({ to: "/sales/cart" as never })
     } catch (cause: unknown) {
       setError(normalizeApiError(cause).message)
     } finally {

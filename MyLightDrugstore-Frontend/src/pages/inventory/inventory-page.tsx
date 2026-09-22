@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Link } from "@/shared/router-compat"
+import { Link } from "@tanstack/react-router"
 import { createInventoryApi, type InventoryLot } from "@/entities/inventory"
 import { apiClient } from "@/shared/api/api-client"
 import {
@@ -121,12 +121,12 @@ export default function InventoryPage() {
         subtitle="Current inventory status"
         action={
           <div className="flex gap-2">
-            <Link to="/inventory/receipts">
+            <Link to={"/inventory/receipts" as never}>
               <Button variant="secondary" size="sm">
                 Receive Stock
               </Button>
             </Link>
-            <Link to="/inventory/adjustments">
+            <Link to={"/inventory/adjustments" as never}>
               <Button variant="outline" size="sm">
                 Adjustments
               </Button>

@@ -1,9 +1,39 @@
-import { Outlet, NavLink, useNavigate } from "../../../shared/router-compat"
+import {
+  Link as TanStackLink,
+  Outlet,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router"
 import { useState } from "react"
+import type { ReactNode } from "react"
 import { useSession } from "../../../shared/SessionContext"
 
 import { getNavigationForRole } from "../model/navigation"
 import { useServerClock } from "../model/use-server-clock"
+
+type NavLinkProps = {
+  to: string
+  title?: string
+  className?: (options: { isActive: boolean }) => string
+  children: ReactNode
+}
+
+function NavLink({ to, title, className, children }: NavLinkProps) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const isActive = pathname === to || pathname.startsWith(`${to}/`)
+
+  return (
+    <TanStackLink
+      to={to as never}
+      title={title}
+      className={className?.({ isActive })}
+    >
+      {children}
+    </TanStackLink>
+  )
+}
 
 interface NavItem {
   label: string
@@ -167,7 +197,7 @@ export default function AppShell({ children }: { children?: React.ReactNode }) {
 
   const handleLogout = async () => {
     await logout()
-    navigate("/login")
+    void navigate({ to: "/login" as never })
   }
 
   return (
