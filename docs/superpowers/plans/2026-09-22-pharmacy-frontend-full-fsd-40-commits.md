@@ -19,6 +19,19 @@
 - Do not reset or discard the existing dirty working tree. Stage only files belonging to the current checkpoint.
 - Produce exactly 40 non-empty commits, one commit per task below. Do not create an aggregate migration commit.
 
+## Implementation quality contract
+
+Every implementation step and every one of the 40 implementation commits must satisfy these rules:
+
+- **Strict typing:** Keep TypeScript `strict` mode enabled. Exported functions, hooks, adapters, components, errors, and callbacks must have explicit input and output types. Use `unknown` at untrusted boundaries and narrow it with validators. Do not introduce `any`, `@ts-ignore`, `@ts-expect-error`, non-null assertions, unchecked JSON casts, or implicit `any`; generated TanStack files are the only `@ts-nocheck` exception.
+- **Production-ready code:** Each checkpoint must leave working code with real behavior, tests, and error handling. Do not commit stubs, placeholders, speculative abstractions, dead compatibility layers, swallowed exceptions, disabled checks, or “temporary” bypasses.
+- **Functional React:** Keep React components, hooks, providers, and page composition functional. Do not force class-based OOP into TSX. Use small pure functions for mapping, validation, query construction, and view-model derivation.
+- **Focused OOP:** Use classes only where object identity/state or platform error semantics materially help, such as typed transport/API errors or an explicitly stateful boundary. Prefer interfaces, discriminated unions, closures, and pure functions for the rest of the frontend.
+- **Readable structure:** One responsibility per module and function; use named intermediate variables for multi-step logic; avoid one-line monsters, deeply nested ternaries, chained side effects, and dense callback bodies. Keep JSX readable and do not hide data fetching or mutation side effects inside visual primitives.
+- **Maintainability and debugging:** Preserve error codes, HTTP status, request IDs, and safe details across boundaries. Catch `unknown`, normalize it once, and never silently swallow failures. Do not add automatic retries for non-idempotent requests. Keep security-sensitive data out of logs and persistent browser storage.
+- **Reviewability:** Each commit must be independently understandable and testable. Avoid drive-by formatting, unrelated renames, generated-file edits outside the owning task, and broad mechanical rewrites that obscure behavior changes.
+- **Verification:** Before each commit, run the narrowest relevant test plus `pnpm run typecheck` for TypeScript changes. Before the final commit, run the complete frontend gate, architecture/code-quality scans, `git diff --check`, and applicable browser/backend verification.
+
 ## File map
 
 | Area | Responsibility |
@@ -458,17 +471,17 @@
 - [ ] Run the checker tests and `pnpm run test:architecture`; expect PASS.
 - [ ] Commit as `test(frontend): enforce fsd import boundaries`.
 
-## Commit 35: Add source-size and legacy architecture checks
+## Commit 35: Add source-size, strict-code, and legacy architecture checks
 
-**Files:** Create `scripts/check-source-size.mjs`; create `scripts/check-source-size.test.mjs`; modify `package.json` architecture script; modify `tests/architecture/no-legacy-api.test.mjs`.
+**Files:** Create `scripts/check-source-size.mjs`; create `scripts/check-source-size.test.mjs`; create `scripts/check-code-quality.mjs`; create `scripts/check-code-quality.test.mjs`; modify `package.json` architecture script; modify `tests/architecture/no-legacy-api.test.mjs`.
 
-**Interfaces:** `node scripts/check-source-size.mjs --enforce` rejects non-generated production files above 300 lines and reports path/line count; legacy checks reject mock, local-session, and compatibility imports.
+**Interfaces:** `node scripts/check-source-size.mjs --enforce` rejects non-generated production files above 300 lines and reports path/line count. `node scripts/check-code-quality.mjs --enforce` rejects production `any`, `@ts-ignore`, `@ts-expect-error`, non-null assertions, and forbidden `@ts-nocheck` outside generated route metadata. Legacy checks reject mock, local-session, and compatibility imports.
 
-- [ ] Write fixture tests for an over-limit source file, generated route-tree exclusion, and forbidden legacy reference.
-- [ ] Run both checker tests; expect failure for missing checker behavior.
-- [ ] Implement the checks and compose both scripts under `pnpm run test:architecture`.
-- [ ] Run checker tests and the enforced architecture command; expect PASS with the migrated source.
-- [ ] Commit as `test(frontend): enforce source architecture limits`.
+- [ ] Write fixture tests for an over-limit source file, generated route-tree exclusion, forbidden legacy references, `any`, `@ts-ignore`, `@ts-expect-error`, non-null assertions, and non-generated `@ts-nocheck`.
+- [ ] Run `pnpm exec node --test scripts/check-source-size.test.mjs scripts/check-code-quality.test.mjs`; expect failure for missing checker behavior.
+- [ ] Implement both checks and compose them under `pnpm run test:architecture`; keep the parser readable and report `{ file, line, rule }` for each violation.
+- [ ] Run the checker tests and `pnpm run test:architecture`; expect PASS with the migrated source.
+- [ ] Commit as `test(frontend): enforce source and code quality limits`.
 
 ## Commit 36: Add transport and entity integration contract tests
 
@@ -544,6 +557,7 @@ pnpm run build
 ## Plan self-review
 
 - The design's UI-preservation constraint is covered by Commits 17, 22, 23, and 24–28.
+- The strict typing, final-code, focused-OOP, readability, maintainability, and debuggability requirements are global acceptance criteria for every commit and are mechanically checked in Commit 35 plus TypeScript/format gates.
 - AES-256-GCM protocol requirements are covered by Commits 02–08 and 36.
 - CSRF, cookies, error normalization, idempotency, binary downloads, and role checks are covered by Commits 07–10, 14–21, and 36–37.
 - Full FSD structure and route boundaries are covered by Commits 16–35.
