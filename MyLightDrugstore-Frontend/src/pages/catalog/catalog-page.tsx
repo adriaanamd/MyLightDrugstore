@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react"
-import { mockApi } from "../shared/api/client"
-import type { Medicine } from "../shared/api/types"
-import { MockApiError } from "../shared/api/types"
+import {
+  createCatalogActions,
+  validateMedicineForm,
+  type MedicineFormValues,
+} from "@/features/catalog-management"
+import { createInventoryMutationActions } from "@/features/inventory-mutations"
+import { createInventoryApi } from "@/entities/inventory"
+import { createMedicineApi, type Medicine } from "@/entities/medicine"
+import { normalizeApiError } from "@/shared/api"
+import { apiClient } from "@/shared/api/api-client"
 import {
   PageHeader,
   Button,
@@ -21,17 +28,15 @@ import {
   showToast,
   ErrorBanner,
   Spinner,
-} from "../shared/ui"
+} from "@/shared/ui"
 
-interface MedForm {
-  genericName: string
-  brandName: string
-  description: string
-  dosageForm: string
-  strength: string
-  unitPrice: string
-  storageLocation: string
-}
+const medicineApi = createMedicineApi(apiClient.transport)
+const catalogActions = createCatalogActions(medicineApi)
+const inventoryActions = createInventoryMutationActions(
+  createInventoryApi(apiClient.transport),
+)
+
+type MedForm = MedicineFormValues
 
 const emptyForm: MedForm = {
   genericName: "",
@@ -83,7 +88,7 @@ export default function CatalogPage() {
           : activeFilter === "archived"
             ? false
             : undefined
-      const result = await mockApi.listMedicines({
+      const result = await medicineApi.list({
         q: searchQ,
         active,
         page,
@@ -91,8 +96,8 @@ export default function CatalogPage() {
       })
       setMedicines(result.data)
       setTotal(result.meta.total)
-    } catch {
-      /* ignore */
+    } catch (cause: unknown) {
+      setFormError(normalizeApiError(cause).message)
     } finally {
       setLoading(false)
     }
@@ -115,12 +120,12 @@ export default function CatalogPage() {
     setEditMed(m)
     setForm({
       genericName: m.genericName,
-      brandName: m.brandName,
-      description: m.description,
+      brandName: m.brandName ?? "",
+      description: m.description ?? "",
       dosageForm: m.dosageForm,
-      strength: m.strength,
+      strength: m.strength ?? "",
       unitPrice: m.unitPrice,
-      storageLocation: m.storageLocation,
+      storageLocation: m.storageLocation ?? "",
     })
     setFormError("")
     setShowForm(true)
@@ -128,32 +133,24 @@ export default function CatalogPage() {
 
   const handleSave = async () => {
     setFormError("")
-    if (!form.genericName.trim()) {
-      setFormError("Generic name is required.")
-      return
-    }
-    if (
-      !form.unitPrice ||
-      isNaN(parseFloat(form.unitPrice)) ||
-      parseFloat(form.unitPrice) < 0
-    ) {
-      setFormError("Valid unit price is required.")
+    const validation = validateMedicineForm(form)
+    if (!validation.valid) {
+      setFormError(Object.values(validation.errors)[0] ?? "Invalid form.")
       return
     }
     setFormLoading(true)
     try {
       if (editMed) {
-        await mockApi.updateMedicine(editMed.id, form)
+        await catalogActions.update(editMed.id, form)
         showToast("Medicine updated successfully.")
       } else {
-        await mockApi.createMedicine(form)
+        await catalogActions.create(form)
         showToast("Medicine created successfully.")
       }
       setShowForm(false)
       await load()
-    } catch (e) {
-      if (e instanceof MockApiError) setFormError(e.apiError.message)
-      else setFormError("Save failed.")
+    } catch (cause: unknown) {
+      setFormError(normalizeApiError(cause).message)
     } finally {
       setFormLoading(false)
     }
@@ -172,23 +169,24 @@ export default function CatalogPage() {
     }
     setStockLoading(true)
     try {
-      await mockApi.receiveStock({
-        receivedAt: new Date().toISOString(),
-        items: [
-          {
-            medicineId: stockMed.id,
-            quantity: stockForm.quantity,
-            expiresAt: stockForm.expiresAt,
-          },
-        ],
-        idempotencyKey: `stock_${stockMed.id}_${Date.now()}`,
-      })
+      await inventoryActions.receive(
+        {
+          receivedAt: new Date().toISOString(),
+          items: [
+            {
+              medicineId: stockMed.id,
+              quantity: stockForm.quantity,
+              expiresAt: stockForm.expiresAt,
+            },
+          ],
+        },
+        load,
+      )
       showToast(`Stock received for ${stockMed.genericName}.`)
       setStockMed(null)
       await load()
-    } catch (e) {
-      if (e instanceof MockApiError) setStockError(e.apiError.message)
-      else setStockError("Failed to receive stock.")
+    } catch (cause: unknown) {
+      setStockError(normalizeApiError(cause).message)
     } finally {
       setStockLoading(false)
     }
@@ -198,12 +196,12 @@ export default function CatalogPage() {
     if (!archiveMed) return
     setArchiveLoading(true)
     try {
-      await mockApi.archiveMedicine(archiveMed.id)
+      await medicineApi.archive(archiveMed.id)
       showToast(`${archiveMed.genericName} archived.`)
       setArchiveMed(null)
       await load()
-    } catch {
-      /* ignore */
+    } catch (cause: unknown) {
+      setFormError(normalizeApiError(cause).message)
     } finally {
       setArchiveLoading(false)
     }

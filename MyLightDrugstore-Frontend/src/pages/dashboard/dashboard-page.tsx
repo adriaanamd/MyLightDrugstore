@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react"
-import { Link } from "../shared/router-compat"
-import { mockApi } from "../shared/api/client"
-import type { Medicine, Sale } from "../shared/api/types"
+import { Link } from "@/shared/router-compat"
+import { createInventoryApi, type InventorySummary } from "@/entities/inventory"
+import { createMedicineApi, type Medicine } from "@/entities/medicine"
+import { createSaleApi, type Sale } from "@/entities/sale"
+import { apiClient } from "@/shared/api/api-client"
+import { normalizeApiError, type ApiError } from "@/shared/api"
 import {
   PageHeader,
   StatCard,
@@ -16,7 +19,22 @@ import {
   Input,
   Spinner,
   EmptyState,
-} from "../shared/ui"
+  ErrorBanner,
+} from "@/shared/ui"
+
+const inventoryApi = createInventoryApi(apiClient.transport)
+const medicineApi = createMedicineApi(apiClient.transport)
+const saleApi = createSaleApi(apiClient.transport)
+
+type DashboardOverview = {
+  medicineCount: number
+
+  totalStockUnits: number
+
+  lowStockCount: number
+
+  expiringSoonCount: number
+}
 
 function saleBadge(sale: Sale) {
   if (sale.state === "cancelled") return <Badge variant="gray">Cancelled</Badge>
@@ -26,27 +44,29 @@ function saleBadge(sale: Sale) {
 }
 
 export default function DashboardPage() {
-  const [overview, setOverview] =
-    useState<Awaited<ReturnType<typeof mockApi.getInventoryOverview>> | null>(
-      null,
-    )
+  const [overview, setOverview] = useState<DashboardOverview | null>(null)
   const [medicines, setMedicines] = useState<Medicine[]>([])
   const [recentSales, setRecentSales] = useState<Sale[]>([])
   const [searchQ, setSearchQ] = useState("")
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<ApiError | null>(null)
 
   const load = async () => {
+    setError(null)
     try {
-      const [ov, medResult, salesResult] = await Promise.all([
-        mockApi.getInventoryOverview(),
-        mockApi.listMedicines({ q: searchQ, active: true, perPage: 20 }),
-        mockApi.listSales({ perPage: 6 }),
+      const [inventoryResult, medResult, salesResult] = await Promise.all([
+        inventoryApi.summary({ perPage: 100 }),
+        medicineApi.list({ q: searchQ, active: true, perPage: 20 }),
+        saleApi.list({ perPage: 6 }),
       ])
-      setOverview(ov)
+
+      setOverview(
+        createOverview(inventoryResult.data, inventoryResult.meta.total),
+      )
       setMedicines(medResult.data)
       setRecentSales(salesResult.data)
-    } catch {
-      /* ignore */
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause))
     } finally {
       setLoading(false)
     }
@@ -87,6 +107,7 @@ export default function DashboardPage() {
 
   return (
     <div>
+      {error && <ErrorBanner message={error.message} />}
       <PageHeader
         title="Dashboard"
         subtitle="Operational overview"
@@ -228,7 +249,7 @@ export default function DashboardPage() {
                       {formatPHP(m.unitPrice)}
                     </Td>
                     <Td className="text-xs text-slate-400">
-                      {m.storageLocation}
+                      {m.storageLocation ?? "—"}
                     </Td>
                   </Tr>
                 ))}
@@ -266,7 +287,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-500">
-                      {sale.createdByName}
+                      {sale.createdByName ?? String(sale.createdBy)}
                     </span>
                     <span className="font-mono text-sm font-semibold text-slate-800">
                       {formatPHP(sale.grandTotal)}
@@ -309,4 +330,28 @@ export default function DashboardPage() {
       </div>
     </div>
   )
+}
+
+function createOverview(
+  inventory: InventorySummary[],
+  medicineCount: number,
+): DashboardOverview {
+  const expiryCutoff = new Date()
+  expiryCutoff.setDate(expiryCutoff.getDate() + 30)
+
+  return {
+    medicineCount,
+    totalStockUnits: inventory.reduce(
+      (total, item) => total + item.stockOnHand,
+      0,
+    ),
+    lowStockCount: inventory.filter((item) => item.lowStock).length,
+    expiringSoonCount: inventory.filter((item) => {
+      if (item.earliestExpiry === null) {
+        return false
+      }
+
+      return new Date(item.earliestExpiry) <= expiryCutoff
+    }).length,
+  }
 }
