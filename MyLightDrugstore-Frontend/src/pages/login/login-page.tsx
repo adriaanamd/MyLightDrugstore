@@ -1,11 +1,11 @@
 import { useState } from "react"
-import { useNavigate, Navigate } from "../shared/router-compat"
-import { useSession } from "../shared/SessionContext"
-import { MockApiError } from "../shared/api/types"
-import { Button, Input, ErrorBanner } from "../shared/ui"
+import { Navigate, useNavigate } from "@/shared/router-compat"
+import { useAuthSession } from "@/features/auth"
+import { normalizeApiError } from "@/shared/api"
+import { Button, ErrorBanner, Input } from "@/shared/ui"
 
 export default function LoginPage() {
-  const { user, login } = useSession()
+  const { user, login } = useAuthSession()
   const navigate = useNavigate()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -18,11 +18,10 @@ export default function LoginPage() {
     setLoading(true)
     setError("")
     try {
-      await login(u, p)
+      await login({ username: u, password: p })
       navigate("/dashboard")
-    } catch (e) {
-      if (e instanceof MockApiError) setError(e.apiError.message)
-      else setError("Login failed. Please try again.")
+    } catch (cause: unknown) {
+      setError(normalizeApiError(cause).message)
     } finally {
       setLoading(false)
     }
