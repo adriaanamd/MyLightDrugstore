@@ -4,6 +4,11 @@ This directory contains the Laravel modular monolith for the MyLightDrugstore
 refactor. It serves the `/api/v1` contract documented in the repository root's
 [`API-DOCS.md`](../API-DOCS.md) for the React Feature-Sliced Design frontend.
 
+The backend requires PHP 8.3.36+, 8.4.27+, or 8.5.12+ on the matching branch.
+Those are the patched releases for PHP2Shell (CVE-2026-109618 and
+CVE-2026-109619). Both Laravel entrypoints fail closed on older runtimes, and
+all PHP workers must be restarted after an upgrade.
+
 ## Architecture
 
 Business code is grouped by module under `app/Modules`:

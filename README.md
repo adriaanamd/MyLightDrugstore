@@ -20,7 +20,7 @@ web server at that folder and open its `index.php` page.
 
 - For the legacy copies: a web server with PHP support, such as Apache, and a
   MySQL-compatible `dbmedicine` schema.
-- For the backend: PHP 8.5, Composer, SQLite for local tests, and MySQL 8 or
+- For the backend: PHP 8.3.36+, 8.4.27+, or 8.5.12+ on the matching branch, Composer, SQLite for local tests, and MySQL 8 or
   MariaDB for deployment and migration checks.
 
 The legacy pages still require a runtime that provides the removed `mysql_*`
@@ -42,6 +42,9 @@ The backend uses `/api/v1`, session authentication, encrypted AES-256-GCM
 transport, encrypted sensitive fields, and module-specific application and
 infrastructure layers. CI runs the Unit, Architecture, FeatureFoundation,
 FeatureBusiness, and FeatureTransport suites plus PHPStan level 9.
+The PHP runtime policy rejects releases vulnerable to PHP2Shell (CVE-2026-109618
+and CVE-2026-109619), and CI is pinned to PHP 8.5.12. Restart all PHP workers
+after upgrading the runtime.
 
 ## Database setup
 

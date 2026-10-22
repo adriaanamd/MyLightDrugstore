@@ -35,7 +35,7 @@ jobs:
       - name: Set up PHP 8.5
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.5"
+          php-version: "8.5.12"
           extensions: curl, fileinfo, mbstring, openssl, pdo_mysql, pdo_sqlite, sqlite3, sodium, zip
           coverage: xdebug
           tools: composer:v2
@@ -108,7 +108,7 @@ jobs:
       - name: Set up PHP 8.5
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.5"
+          php-version: "8.5.12"
           extensions: curl, fileinfo, mbstring, openssl, pdo_mysql, pdo_sqlite, sqlite3, sodium, zip
           tools: composer:v2
 
