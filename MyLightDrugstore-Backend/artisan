@@ -6,6 +6,9 @@ use Symfony\Component\Console\Input\ArgvInput;
 
 define('LARAVEL_START', microtime(true));
 
+require_once __DIR__.'/app/Support/PhpRuntimePolicy.php';
+\App\Support\PhpRuntimePolicy::assertSupported(PHP_VERSION);
+
 // Register the Composer autoloader...
 require __DIR__.'/vendor/autoload.php';
 
